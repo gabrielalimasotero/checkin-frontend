@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+# CheckIn App
 
-## Project info
+A social check-in application that allows users to share their location, connect with friends, and discover places around them.
 
-**URL**: https://lovable.dev/projects/9071620b-e411-43dc-ba5e-fd5479fee20d
+## Project Overview
 
-## How can I edit this code?
+CheckIn is a mobile-first social networking app built with React and TypeScript. Users can:
 
-There are several ways of editing your application.
+- **Check-in** at venues and share their location
+- **Connect** with friends and see their check-ins
+- **Discover** new places and people nearby
+- **Manage** their social network and invitations
+- **Rate** and review places they've visited
 
-**Use Lovable**
+## Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9071620b-e411-43dc-ba5e-fd5479fee20d) and start prompting.
+### Core Functionality
+- **Check-in System**: Users can check-in at venues and share their status
+- **Social Network**: Friend connections and social interactions
+- **Venue Discovery**: Find and explore new places
+- **Real-time Updates**: Live status and location sharing
+- **Invitation System**: Send and receive event invitations
 
-Changes made via Lovable will be committed automatically to this repo.
+### User Interface
+- **Mobile-First Design**: Optimized for mobile devices
+- **Tab Navigation**: Easy navigation between main sections
+- **Real-time Notifications**: Stay updated with friend activities
+- **Clean UI**: Modern, intuitive interface using shadcn/ui components
 
-**Use your preferred IDE**
+## Technology Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Routing**: React Router DOM
+- **State Management**: React Query for server state
+- **Build Tool**: Vite
+- **UI Components**: Radix UI primitives with custom styling
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Project Structure
 
-Follow these steps:
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   └── ...             # Custom components
+├── pages/              # Main application pages
+├── contexts/           # React contexts
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions and design system
+└── main.tsx           # Application entry point
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Installation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# Clone the repository
+git clone <repository-url>
+cd checkin-frontend
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Available Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run check-design` - Check design system consistency
 
-**Use GitHub Codespaces**
+## Design System
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The app uses a consistent design system with:
 
-## What technologies are used for this project?
+- **Color Palette**: Primary blue (#084d6e), white, and black
+- **Typography**: Helvetica as default, Ubuntu for headings
+- **Components**: Standardized UI components with consistent spacing
+- **Layout**: Mobile-first responsive design
 
-This project is built with:
+## Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Follow the existing code style and patterns
+2. Use the design system components and classes
+3. Test on mobile devices
+4. Ensure accessibility standards are met
 
-## How can I deploy this project?
+## License
 
-Simply open [Lovable](https://lovable.dev/projects/9071620b-e411-43dc-ba5e-fd5479fee20d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is private and proprietary.

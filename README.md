@@ -2,6 +2,8 @@
 
 A social check-in application that allows users to share their location, connect with friends, and discover places around them.
 
+O app vai ser como https://checkin-social-hub-93.lovable.app/home
+
 ## Project Overview
 
 CheckIn is a mobile-first social networking app built with React and TypeScript. Users can:

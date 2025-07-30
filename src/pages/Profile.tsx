@@ -52,9 +52,7 @@ const Profile = () => {
   
   
   // Interesses do usuário
-  const [interests, setInterests] = useState([
-    "Champions League", "Futebol", "Craft Beer", "Pizza", "Rock", "Jazz", "Academia"
-  ]);
+  const [interests, setInterests] = useState<string[]>([]);
   const [showAddInterest, setShowAddInterest] = useState(false);
   const [newInterest, setNewInterest] = useState("");
 
@@ -130,25 +128,8 @@ const Profile = () => {
       {/* Header */}
       <div className="bg-gradient-to-br from-primary to-primary/80 p-3 text-primary-foreground">
         <div className="flex justify-between items-start mb-3">
-          <div>
-            <h1 className="text-base font-bold">Meu Perfil</h1>
-            <div className="flex items-center space-x-1">
-              <MapPin className="w-3 h-3 text-primary-foreground/70" />
-              <span className="text-xs text-primary-foreground/70">Recife</span>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* User Info - Layout mais compacto */}
-        <div className="flex items-center space-x-3 mb-3">
+          {/* User Info - Layout mais compacto */}
+          <div className="flex items-center space-x-3">
           <Avatar className="w-12 h-12 border-2 border-primary-foreground/20">
             <AvatarImage src={user?.avatar} />
             <AvatarFallback className="bg-primary-foreground text-primary font-bold text-sm">
@@ -166,15 +147,12 @@ const Profile = () => {
             ) : (
               <>
                 <h2 className="text-lg font-bold truncate">Carlos Mendonça</h2>
-                <p className="text-primary-foreground/70 text-xs">@carlosm_recife</p>
+                <p className="text-primary-foreground/70 text-xs">carlos@email.com</p>
               </>
             )}
             <div className="flex items-center space-x-1.5 mt-1">
               <Badge className="bg-primary-foreground/20 text-primary-foreground text-xs h-5 px-2">
                 ✓ Conectável
-              </Badge>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground text-xs h-5 px-2">
-                🏆 Nível 5
               </Badge>
             </div>
           </div>
@@ -187,9 +165,21 @@ const Profile = () => {
             <Edit3 className="w-4 h-4" />
           </Button>
         </div>
+        
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
 
         {/* Stats - Layout mais compacto */}
-        <div className="grid grid-cols-4 gap-3 bg-primary-foreground/10 rounded-lg p-2">
+        <div className="grid grid-cols-3 gap-3 bg-primary-foreground/10 rounded-lg p-2">
           <button 
             onClick={() => setShowCheckinsDialog(true)}
             className="text-center hover:bg-primary-foreground/10 rounded-md p-1 transition-colors"
@@ -211,13 +201,6 @@ const Profile = () => {
             <div className="text-base font-bold">{stats.friends}</div>
             <div className="text-xs text-primary-foreground/70">Amigos</div>
           </button>
-          <button 
-            onClick={() => setShowBadgesDialog(true)}
-            className="text-center hover:bg-primary-foreground/10 rounded-md p-1 transition-colors"
-          >
-            <div className="text-base font-bold">{stats.badges}</div>
-            <div className="text-xs text-primary-foreground/70">Badges</div>
-          </button>
         </div>
       </div>
 
@@ -231,40 +214,57 @@ const Profile = () => {
           </h3>
           
           <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {interests.map((interest) => (
-                <Badge key={interest} variant="accept" className="text-sm font-semibold flex items-center">
-                  {interest}
-                  <button onClick={() => removeInterest(interest)} className="ml-2">
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-
-            {showAddInterest ? (
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Novo interesse..."
-                  value={newInterest}
-                  onChange={(e) => setNewInterest(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addInterest()}
-                  className="flex-1"
-                />
-                <Button size="sm" onClick={addInterest}>
-                  Adicionar
+            {interests.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500 mb-3">Nenhum interesse adicionado ainda</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowAddInterest(true)}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Interesse
                 </Button>
               </div>
             ) : (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowAddInterest(true)}
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Interesse
-              </Button>
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {interests.map((interest) => (
+                    <Badge key={interest} variant="accept" className="text-sm font-semibold flex items-center">
+                      {interest}
+                      <button onClick={() => removeInterest(interest)} className="ml-2">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+
+                {showAddInterest ? (
+                  <div className="flex space-x-2">
+                    <Input
+                      placeholder="Novo interesse..."
+                      value={newInterest}
+                      onChange={(e) => setNewInterest(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addInterest()}
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={addInterest}>
+                      Adicionar
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowAddInterest(true)}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Interesse
+                  </Button>
+                )}
+              </>
             )}
             
             <p className="text-xs text-gray-500">
@@ -447,43 +447,7 @@ const Profile = () => {
           </div>
         </Card>
 
-        {/* Badges */}
-        <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <h3 className="font-semibold mb-3 flex items-center text-foreground">
-            <Award className="w-4 h-4 mr-2" />
-            Conquistas
-          </h3>
-          
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/30 rounded-xl flex items-center justify-center mb-1 mx-auto shadow-lg border-2 border-primary/40">
-                <Award className="w-6 h-6 text-primary" />
-              </div>
-              <p className="text-xs text-foreground font-medium">Explorador</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-accent/20 to-accent/30 rounded-xl flex items-center justify-center mb-1 mx-auto shadow-lg border-2 border-accent/40">
-                <Users className="w-6 h-6 text-accent" />
-              </div>
-              <p className="text-xs text-foreground font-medium">Social</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-secondary/20 to-secondary/30 rounded-xl flex items-center justify-center mb-1 mx-auto shadow-lg border-2 border-secondary/40">
-                <Star className="w-6 h-6 text-secondary-foreground" />
-              </div>
-              <p className="text-xs text-foreground font-medium">Crítico</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-muted/40 to-muted/60 rounded-xl flex items-center justify-center mb-1 mx-auto shadow-lg border-2 border-muted">
-                <Camera className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-xs text-foreground font-medium">Fotógrafo</p>
-            </div>
-          </div>
-          <div className="mt-3 text-center">
-            <p className="text-xs text-primary">✨ Continue explorando para desbloquear mais conquistas!</p>
-          </div>
-        </Card>
+
       </div>
 
 

@@ -7,7 +7,7 @@ import NetworkTab from "@/components/NetworkTab";
 import ForYouTab from "@/components/ForYouTab";
 
 const Home = () => {
-  const [activeTab, setActiveTab] = useState("network");
+  const [activeTab, setActiveTab] = useState("foryou");
 
   return (
     <div className="mobile-viewport bg-background flex flex-col">

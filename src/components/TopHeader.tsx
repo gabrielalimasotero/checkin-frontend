@@ -14,7 +14,7 @@ const TopHeader = () => {
         <div className="flex items-center space-x-3">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-lg font-bold text-primary">CheckIn</h1>
+            <h1 className="text-lg font-bold text-primary font-ubuntu">CheckIn</h1>
           </div>
           
           {/* Search Bar */}

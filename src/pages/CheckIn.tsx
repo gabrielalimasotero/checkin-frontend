@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Plus, Eye, CheckCircle2 } from "lucide-react";
+import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Eye, MessageSquare } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
 import MyCheckInsTab from "@/components/MyCheckInsTab";
 import StatusTab from "@/components/StatusTab";
@@ -74,25 +74,7 @@ const CheckIn = () => {
     }
   ];
 
-  // Amigos que já concluíram check-in hoje
-  const friendsCompletedToday = [
-    {
-      id: 3,
-      name: "João Santos",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      venue: "Café Central",
-      time: "há 2h",
-      status: "completed"
-    },
-    {
-      id: 4,
-      name: "Carlos Lima",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      venue: "Bar Esportivo", 
-      time: "há 3h",
-      status: "completed"
-    }
-  ];
+
 
   // Check-ins históricos para avaliação (removido Boteco da Maria)
   const historicCheckins = [
@@ -230,21 +212,26 @@ const CheckIn = () => {
 
   return (
     <div className="mobile-viewport bg-background flex flex-col">
-      {/* Header com gradiente e melhor proporção */}
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-b border-border/50">
-        <div className={`${LAYOUT.container} ${COMPONENT_VARIANTS.padding.lg}`}>
+      {/* Header */}
+      <div className="bg-white border-b border-border sticky top-0 z-50">
+        <div className="max-w-sm mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-primary mb-1">Check-in</h1>
-              <p className="text-caption">Gerencie suas experiências</p>
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <h1 className="text-lg font-bold text-primary font-ubuntu">CheckIn</h1>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="rounded-full w-10 h-10 p-0"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2"
+                onClick={() => navigate('/messages')}
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -325,44 +312,7 @@ const CheckIn = () => {
                 </div>
               </Card>
 
-              {/* Amigos que Finalizaram Hoje - Layout mais vertical */}
-              <Card className={COMPONENT_VARIANTS.card.standard}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-semibold flex items-center">
-                    <CheckCircle2 className="w-5 h-5 mr-2 text-green-600" />
-                    Finalizados Hoje
-                  </h3>
-                  <Badge variant="secondary" className="text-xs">
-                    {friendsCompletedToday.length}
-                  </Badge>
-                </div>
-                <div className={COMPONENT_VARIANTS.spacing.md}>
-                  {friendsCompletedToday.map((friend) => (
-                    <div key={friend.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-green-300 rounded-lg bg-green-50/50 hover:bg-green-50 transition-colors`}>
-                      <div className="flex items-center space-x-3">
-                        <img 
-                          src={friend.avatar} 
-                          alt={friend.name} 
-                          className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
-                        />
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{friend.name}</div>
-                          <div className="text-caption">{friend.venue}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{friend.time}</div>
-                        </div>
-                        <div className="flex flex-col items-end space-y-2">
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                            Finalizado
-                          </Badge>
-                          <Button variant="ghost" size="sm" className="text-xs h-7">
-                            Ver local
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+
 
               {/* Explorar Pessoas - Cards mais altos */}
               <Card className={COMPONENT_VARIANTS.card.standard}>

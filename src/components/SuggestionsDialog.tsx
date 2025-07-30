@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Filter, Users, Tag, DollarSign, Target } from "lucide-react";
+import { MapPin, Filter, Users, DollarSign, Target } from "lucide-react";
 
 interface SuggestionsDialogProps {
   isOpen: boolean;
@@ -19,8 +19,6 @@ const SuggestionsDialog = ({ isOpen, onClose }: SuggestionsDialogProps) => {
 
   const filterOptions = [
     { id: "route", label: "No caminho", icon: MapPin, active: startLocation || endLocation },
-    { id: "interests", label: "Com base em interesses", icon: Tag, active: false },
-    { id: "solo", label: "Para ir sozinho", icon: Users, active: false },
     { id: "friends", label: "Onde tem amigos", icon: Users, active: false },
     { id: "promotions", label: "Onde tem promoção", icon: DollarSign, active: false }
   ];

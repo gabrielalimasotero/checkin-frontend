@@ -123,6 +123,7 @@
   body {
     @apply bg-background text-foreground;
     /* Mobile optimization for 19.5:9 aspect ratio */
+    font-family: 'Helvetica', 'Arial', sans-serif;
     font-size: var(--font-size-base);
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
@@ -183,6 +184,10 @@
   
   .gradient-text {
     @apply bg-gradient-to-r from-checkin-primary-500 to-checkin-primary-700 bg-clip-text text-transparent;
+  }
+
+  .font-ubuntu {
+    font-family: 'Ubuntu', 'Helvetica', 'Arial', sans-serif;
   }
 
   /* Mobile app container - 19.5:9 aspect ratio */

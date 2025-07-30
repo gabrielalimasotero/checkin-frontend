@@ -3,12 +3,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin, Clock, TrendingUp, MessageSquare } from "lucide-react";
-import MessagesDialog from "./MessagesDialog";
+import { Star, MapPin, Clock, TrendingUp } from "lucide-react";
 
 const ExploreTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showMessages, setShowMessages] = useState(false);
 
   const categories = [
     { id: "all", label: "Todos" },
@@ -59,21 +57,7 @@ const ExploreTab = () => {
 
   return (
     <div className="p-4 pb-20 space-y-4">
-      {/* Header com ícone de mensagens */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Explorar Pessoas</h2>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="p-2"
-          onClick={() => setShowMessages(true)}
-        >
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-      </div>
+
       {/* Category Filter */}
       <div className="flex space-x-2 overflow-x-auto pb-2">
         {categories.map((category) => (
@@ -144,10 +128,8 @@ const ExploreTab = () => {
             </div>
           </Card>
         ))}
+              </div>
       </div>
-      
-      <MessagesDialog open={showMessages} onOpenChange={setShowMessages} />
-    </div>
   );
 };
 

@@ -221,13 +221,13 @@ const CheckIn = () => {
               <h1 className="text-lg font-bold text-primary font-ubuntu">CheckIn</h1>
             </div>
             
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-1">
+            {/* Action Button */}
+            <div className="flex items-center">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className="p-2"
-                onClick={() => navigate('/messages')}
+                onClick={() => navigate(`/messages?table=${currentVenue.table}`)}
               >
                 <MessageSquare className="w-5 h-5" />
               </Button>

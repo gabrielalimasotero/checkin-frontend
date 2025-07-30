@@ -248,32 +248,8 @@ const CheckIn = () => {
             </TabsList>
 
             <TabsContent value="geral" className={LAYOUT.section}>
-              {/* Seção de Status Atual */}
-              <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-semibold flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-primary" />
-                    Status Atual
-                  </h3>
-                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-                    Ativo
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-medium">Boteco da Maria</h4>
-                    <p className="text-caption">Mesa 8 • Desde 18:00</p>
-                  </div>
-                  <Button size="sm" variant="outline">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                </div>
-              </Card>
 
-              {/* Amigos com Contas Abertas - Layout mais vertical */}
+              {/* Contas Abertas - Incluindo o usuário no topo */}
               <Card className={COMPONENT_VARIANTS.card.standard}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base font-semibold flex items-center">
@@ -281,10 +257,30 @@ const CheckIn = () => {
                     Contas Abertas
                   </h3>
                   <Badge variant="secondary" className="text-xs">
-                    {friendsWithOpenTabs.length}
+                    {friendsWithOpenTabs.length + 1}
                   </Badge>
                 </div>
                 <div className={COMPONENT_VARIANTS.spacing.md}>
+                  {/* Check-in do usuário no topo */}
+                  <div className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-primary/50 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors`}>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/30">
+                        <span className="text-primary font-bold text-sm">CM</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">Você</div>
+                        <div className="text-caption">{currentVenue.name}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Desde {currentVenue.checkInTime}</div>
+                      </div>
+                      <div className="flex flex-col items-end space-y-2">
+                        <Button variant="ghost" size="sm" className="text-xs h-7">
+                          Ver local
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Check-ins dos amigos */}
                   {friendsWithOpenTabs.map((friend) => (
                     <div key={friend.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-primary/30 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors`}>
                       <div className="flex items-center space-x-3">

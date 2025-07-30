@@ -20,10 +20,10 @@ const ForYouTab = () => {
 
   // Filtros para "Quero sair"
   const wantToGoFilters = [
-    { id: "solo", label: "Sozinho", emoji: "🚶", description: "Atividades para fazer sozinho" },
-    { id: "friends", label: "Com amigos", emoji: "👥", description: "Selecionar amigos ou conhecer pessoas" },
-    { id: "date", label: "Encontro", emoji: "💕", description: "Selecionar pessoa ou conhecer alguém" },
-    { id: "groups", label: "Grupos", emoji: "👨‍👩‍👧‍👦", description: "Selecionar grupo ou conhecer grupos" },
+    { id: "solo", label: "Sozinho", description: "Atividades para fazer sozinho" },
+    { id: "friends", label: "Com amigos", description: "Selecionar amigos ou conhecer pessoas" },
+    { id: "date", label: "A dois", description: "Selecionar pessoa ou conhecer alguém" },
+    { id: "groups", label: "Grupos", description: "Selecionar grupo ou conhecer grupos" },
   ];
 
   // Dados de amigos
@@ -167,12 +167,8 @@ const ForYouTab = () => {
             onClick={() => handleFilterSelect(filter.id)}
           >
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">{filter.emoji}</span>
-              </div>
               <div className="flex-1">
                 <h3 className="text-base font-semibold">{filter.label}</h3>
-                <p className="text-caption">{filter.description}</p>
               </div>
             </div>
           </Card>
@@ -227,7 +223,7 @@ const ForYouTab = () => {
                 <div className="flex-1">
                   <div className="text-sm font-medium">{friend.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {friend.status === 'online' ? '🟢 Online' : '⚪ Offline'}
+                    {friend.status === 'online' ? 'Online' : 'Offline'}
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
@@ -286,7 +282,7 @@ const ForYouTab = () => {
                 </Avatar>
                 <div className="flex-1">
                   <div className="text-sm font-medium">{friend.name}</div>
-                  <div className="text-xs text-muted-foreground">🟢 Online</div>
+                  <div className="text-xs text-muted-foreground">Online</div>
                 </div>
                 <Button variant="outline" size="sm">
                   Convidar
@@ -345,7 +341,7 @@ const ForYouTab = () => {
                 <div className="flex-1">
                   <div className="text-sm font-medium">{group.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {group.members} membros • 🟢 Ativo
+                    {group.members} membros • Ativo
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
@@ -422,10 +418,10 @@ const ForYouTab = () => {
               />
               <div className="absolute top-2 left-2 flex gap-1">
                 <Badge className="bg-primary text-primary-foreground text-xs">
-                  {suggestion.type === "restaurant" && "🍽️ Restaurante"}
-                  {suggestion.type === "event" && "🎵 Evento"}
-                  {suggestion.type === "bar" && "🍻 Bar"}
-                  {suggestion.type === "activity" && "🏃 Atividade"}
+                  {suggestion.type === "restaurant" && "Restaurante"}
+                  {suggestion.type === "event" && "Evento"}
+                  {suggestion.type === "bar" && "Bar"}
+                  {suggestion.type === "activity" && "Atividade"}
                 </Badge>
               </div>
               <div className="absolute top-2 right-2">
@@ -492,14 +488,14 @@ const ForYouTab = () => {
 
               <div className="bg-primary/5 rounded-md p-2 mb-3">
                 <p className="text-caption text-primary">
-                  💡 {suggestion.matchReason}
+                  {suggestion.matchReason}
                 </p>
               </div>
 
               {suggestion.weather && (
                 <div className="bg-blue-50 rounded-md p-2 mb-3">
                   <p className="text-caption text-blue-700">
-                    ☀️ {suggestion.weather}
+                    {suggestion.weather}
                   </p>
                 </div>
               )}

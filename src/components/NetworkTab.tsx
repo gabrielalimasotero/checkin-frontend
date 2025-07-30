@@ -4,11 +4,76 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageSquare, MapPin, Star, Verified, MoreHorizontal, Trash2 } from "lucide-react";
+import { Heart, MessageSquare, MapPin, Star, Verified, MoreHorizontal, Trash2, Calendar, Users } from "lucide-react";
 
 const NetworkTab = () => {
   const [statusText, setStatusText] = useState("");
   const [deletedPosts, setDeletedPosts] = useState<number[]>([]);
+  const [showInvitations, setShowInvitations] = useState(false);
+
+  // Dados de convites (aceitos e pendentes)
+  const receivedInvitations = [
+    {
+      id: 1,
+      type: "event",
+      title: "Happy Hour Sexta-feira",
+      organizer: {
+        name: "João Silva",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+      },
+      venue: "Bar do Zé",
+      date: "Sexta, 20:00",
+      attendees: 8,
+      description: "Vamos celebrar o fim de semana!",
+      time: "há 2 horas",
+      status: "pending"
+    },
+    {
+      id: 2,
+      type: "dinner",
+      title: "Jantar de Aniversário",
+      organizer: {
+        name: "Maria Santos",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
+      },
+      venue: "Restaurante Italiano",
+      date: "Sábado, 19:30",
+      attendees: 12,
+      description: "Celebrando 25 anos!",
+      time: "há 1 dia",
+      status: "accepted"
+    },
+    {
+      id: 3,
+      type: "activity",
+      title: "Passeio no Parque",
+      organizer: {
+        name: "Pedro Costa",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
+      },
+      venue: "Parque Ibirapuera",
+      date: "Domingo, 15:00",
+      attendees: 5,
+      description: "Caminhada e piquenique",
+      time: "há 3 dias",
+      status: "pending"
+    },
+    {
+      id: 4,
+      type: "event",
+      title: "Show de Rock",
+      organizer: {
+        name: "Ana Costa",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
+      },
+      venue: "Casa de Shows",
+      date: "Próximo Sábado, 22:00",
+      attendees: 15,
+      description: "Banda local tocando!",
+      time: "há 5 dias",
+      status: "accepted"
+    }
+  ];
 
   const networkPosts = [
     {
@@ -70,8 +135,129 @@ const NetworkTab = () => {
     setDeletedPosts(prev => [...prev, postId]);
   };
 
+  const handleAcceptInvitation = (invitationId: number) => {
+    console.log("Convite aceito:", invitationId);
+  };
+
+  const handleDeclineInvitation = (invitationId: number) => {
+    console.log("Convite recusado:", invitationId);
+  };
+
+  const toggleInvitations = () => {
+    setShowInvitations(!showInvitations);
+  };
+
   return (
     <div className="p-4 space-y-4 pb-24">{/* Extra padding for bottom navigation */}
+      {/* Botão "Meus Convites" */}
+      <div className="space-y-4">
+        <Button 
+          className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-semibold"
+          onClick={toggleInvitations}
+        >
+          <Calendar className="w-5 h-5 mr-2" />
+          Meus Convites
+        </Button>
+      </div>
+
+      {/* Convites Expandidos */}
+      {showInvitations && receivedInvitations.length > 0 && (
+        <div className="space-y-3">
+          {receivedInvitations.map((invitation) => (
+            <Card key={invitation.id} className={`p-4 border-2 ${
+              invitation.status === "accepted" 
+                ? "border-green-200 bg-green-50/50" 
+                : "border-primary/20 bg-primary/5"
+            }`}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={invitation.organizer.avatar} alt={invitation.organizer.name} />
+                    <AvatarFallback>{invitation.organizer.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold">{invitation.organizer.name}</span>
+                      <Badge className={`text-xs ${
+                        invitation.status === "accepted" 
+                          ? "bg-green-500 text-white" 
+                          : "bg-primary text-primary-foreground"
+                      }`}>
+                        {invitation.status === "accepted" ? "Aceito" : (
+                          invitation.type === "event" ? "Evento" :
+                          invitation.type === "dinner" ? "Jantar" :
+                          "Atividade"
+                        )}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{invitation.time}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <h4 className={`font-semibold ${invitation.status === "accepted" ? "text-green-700" : "text-primary"}`}>
+                  {invitation.title}
+                </h4>
+                <p className="text-sm text-muted-foreground">{invitation.description}</p>
+                
+                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <MapPin className="w-3 h-3" />
+                    <span>{invitation.venue}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{invitation.date}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Users className="w-3 h-3" />
+                    <span>{invitation.attendees} pessoas</span>
+                  </div>
+                </div>
+              </div>
+
+              {invitation.status === "pending" ? (
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                    onClick={() => handleAcceptInvitation(invitation.id)}
+                  >
+                    Aceitar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleDeclineInvitation(invitation.id)}
+                  >
+                    Recusar
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="flex-1 border-green-500 text-green-700 hover:bg-green-50"
+                  >
+                    Ver Detalhes
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
+
       {/* Status Composer */}
       <Card className="p-4">
         <div className="flex items-start space-x-3">

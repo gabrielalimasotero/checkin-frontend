@@ -135,62 +135,10 @@ const StatusTab = ({
 
   return (
     <div className={LAYOUT.section}>
-      {/* Check-in Ativo - Layout mais vertical e harmonioso */}
+      {/* Você está em */}
       <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold flex items-center">
-            <MapPin className="w-5 h-5 mr-2 text-primary" />
-            Check-in Ativo
-          </h3>
-          <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-            {currentCheckin.status}
-          </Badge>
-        </div>
-        
-        <div className={`${COMPONENT_VARIANTS.padding.md} bg-white/80 rounded-xl border border-primary/20`}>
-          <div className="flex items-center space-x-4">
-            <img 
-              src={currentCheckin.image} 
-              alt={currentCheckin.venue}
-              className="w-16 h-16 rounded-xl object-cover shadow-sm"
-            />
-            <div className="flex-1">
-              <h4 className="text-base font-medium">{currentCheckin.venue}</h4>
-              <div className="flex items-center space-x-2 text-caption mt-1">
-                <Clock className="w-3 h-3" />
-                <span>{currentCheckin.time}</span>
-              </div>
-              <div className="flex items-center space-x-2 mt-2">
-                {currentCheckin.totalPaid > 0 && (
-                  <span className="text-xs font-medium text-primary">
-                    R$ {currentCheckin.totalPaid.toFixed(2)}
-                  </span>
-                )}
-              </div>
-              {currentCheckin.rating > 0 && (
-                <div className="flex items-center space-x-1 mt-2">
-                  {renderStars(currentCheckin.rating)}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col space-y-2">
-              <Button variant="outline" size="sm" className="text-xs h-8" onClick={handleVenueClick}>
-                <Eye className="w-3 h-3 mr-1" />
-                Ver
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-4">
-          <Button 
-            variant="outline" 
-            className={`w-full h-12 ${COMPONENT_VARIANTS.button.outline}`}
-            onClick={onCheckIn}
-          >
-            <EyeOff className="w-4 h-4 mr-2" />
-            Ocultar check-in
-          </Button>
+        <div>
+          <h3 className="text-base font-semibold text-primary">Você está em {currentCheckin.venue}.</h3>
         </div>
       </Card>
 
@@ -274,116 +222,7 @@ const StatusTab = ({
         )}
       </Card>
 
-      {/* Pessoas Aqui - Layout mais vertical */}
-      <Card className={COMPONENT_VARIANTS.card.standard}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold flex items-center">
-            <Users className="w-5 h-5 mr-2 text-primary" />
-            Pessoas Aqui
-          </h3>
-          <Badge variant="secondary" className="text-xs">
-            {peopleCurrentlyHere.length}
-          </Badge>
-        </div>
-        
-        <div className={COMPONENT_VARIANTS.spacing.md}>
-          {peopleCurrentlyHere.map((person) => (
-            <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors`}>
-              <div className="flex items-center space-x-3">
-                <Avatar className="w-12 h-12">
-                  <AvatarImage src={person.avatar} alt={person.name} />
-                  <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{person.name}</div>
-                  <div className="text-caption">
-                    {person.isTable ? 'Na mesa' : 'No local'}
-                  </div>
-                </div>
-                <div className="flex flex-col items-end space-y-1">
-                  <Badge 
-                    variant={person.isTable ? "default" : "secondary"} 
-                    className="text-xs"
-                  >
-                    {person.isTable ? 'Mesa' : 'Local'}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
 
-      {/* Pessoas que Saíram - Layout mais vertical */}
-      {peopleWhoLeft.length > 0 && (
-        <Card className={COMPONENT_VARIANTS.card.standard}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold flex items-center">
-              <Users className="w-5 h-5 mr-2 text-muted-foreground" />
-              Pessoas que Saíram
-            </h3>
-            <Badge variant="secondary" className="text-xs">
-              {peopleWhoLeft.length}
-            </Badge>
-          </div>
-          
-          <div className={COMPONENT_VARIANTS.spacing.md}>
-            {peopleWhoLeft.map((person) => (
-              <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/20 rounded-lg opacity-75`}>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={person.avatar} alt={person.name} />
-                    <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{person.name}</div>
-                    <div className="text-caption">
-                      Saiu {person.leftTime}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Pessoas que Vão Vir - Layout mais vertical */}
-      {peoplePlanningToCome.length > 0 && (
-        <Card className={COMPONENT_VARIANTS.card.standard}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-orange-500" />
-              Vão Vir
-            </h3>
-            <Badge variant="secondary" className="text-xs">
-              {peoplePlanningToCome.length}
-            </Badge>
-          </div>
-          
-          <div className={COMPONENT_VARIANTS.spacing.md}>
-            {peoplePlanningToCome.map((person) => (
-              <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-orange-300 rounded-lg bg-orange-50/50`}>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={person.avatar} alt={person.name} />
-                    <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{person.name}</div>
-                    <div className="text-caption">
-                      Confirmado para vir
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
-                    RSVP
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 };

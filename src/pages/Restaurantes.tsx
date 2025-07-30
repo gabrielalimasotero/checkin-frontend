@@ -1,0 +1,189 @@
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Search, Utensils, MapPin, Star, Award, Heart, Salad } from "lucide-react";
+import MobileNavigation from "@/components/MobileNavigation";
+
+const Restaurantes = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Tipos de culinária e categorias de restaurantes
+  const cuisineTypes = [
+    {
+      id: 1,
+      name: "Melhores Avaliados",
+      count: 156,
+      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=150&fit=crop",
+      gradient: "from-yellow-400 to-orange-500",
+      description: "Top restaurantes da cidade",
+      icon: Award
+    },
+    {
+      id: 2,
+      name: "Brasileira",
+      count: 89,
+      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&h=150&fit=crop",
+      gradient: "from-green-400 to-yellow-500",
+      description: "Sabores tradicionais do Brasil",
+      icon: Heart
+    },
+    {
+      id: 3,
+      name: "Saudável",
+      count: 67,
+      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=150&fit=crop",
+      gradient: "from-green-400 to-emerald-500",
+      description: "Opções naturais e nutritivas",
+      icon: Salad
+    },
+    {
+      id: 4,
+      name: "Hamburguerias",
+      count: 123,
+      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=150&fit=crop",
+      gradient: "from-yellow-400 to-orange-500",
+      description: "Os melhores burgers da cidade",
+      icon: Utensils
+    },
+    {
+      id: 5,
+      name: "Pizzarias",
+      count: 156,
+      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
+      gradient: "from-red-400 to-yellow-500",
+      description: "Pizzas artesanais e tradicionais",
+      icon: Utensils
+    },
+    {
+      id: 6,
+      name: "Italiana",
+      count: 67,
+      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
+      gradient: "from-red-400 to-green-500",
+      description: "Autêntica culinária italiana",
+      icon: Utensils
+    },
+    {
+      id: 7,
+      name: "Japonesa",
+      count: 94,
+      image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=200&h=150&fit=crop",
+      gradient: "from-pink-400 to-red-500",
+      description: "Sushi, sashimi e pratos nipônicos",
+      icon: Utensils
+    },
+    {
+      id: 8,
+      name: "Chinesa",
+      count: 78,
+      image: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=200&h=150&fit=crop",
+      gradient: "from-yellow-400 to-red-500",
+      description: "Tradições culinárias chinesas",
+      icon: Utensils
+    },
+    {
+      id: 9,
+      name: "Frutos do Mar",
+      count: 45,
+      image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=200&h=150&fit=crop",
+      gradient: "from-blue-400 to-teal-500",
+      description: "Especialidades marinhas",
+      icon: Utensils
+    },
+    {
+      id: 10,
+      name: "Fast Food",
+      count: 89,
+      image: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&h=150&fit=crop",
+      gradient: "from-orange-400 to-red-500",
+      description: "Opções rápidas e saborosas",
+      icon: Utensils
+    }
+  ];
+
+  return (
+    <div className="mobile-viewport bg-checkin-pearl-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-white shadow-sm p-3 sticky top-0 z-10">
+        <div className="flex items-center space-x-3 mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/social")}
+            className="p-2 h-8 w-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="w-8 h-8 bg-gradient-to-br from-checkin-coral-400 to-checkin-warm-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <Utensils className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-checkin-deep-700">Restaurantes</h1>
+            <p className="text-xs text-checkin-slate-500">Explore por categoria e tipo</p>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Buscar categoria ou tipo..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 h-10 rounded-xl text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-3 pb-24">
+        <div className="grid grid-cols-2 gap-3">
+          {cuisineTypes
+            .filter(cuisine => 
+              cuisine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              cuisine.description.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((cuisine) => {
+              const IconComponent = cuisine.icon;
+              return (
+                <Card key={cuisine.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                  <div className="h-20 relative">
+                    <img 
+                      src={cuisine.image} 
+                      alt={cuisine.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${cuisine.gradient} opacity-90`} />
+                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-2">
+                      <IconComponent className="w-5 h-5 mb-1" />
+                      <h3 className="text-sm font-semibold text-center">{cuisine.name}</h3>
+                      <p className="text-xs opacity-90">{cuisine.count} locais</p>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+        </div>
+
+        {searchQuery && cuisineTypes.filter(cuisine => 
+          cuisine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          cuisine.description.toLowerCase().includes(searchQuery.toLowerCase())
+        ).length === 0 && (
+          <div className="text-center py-8">
+            <Utensils className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">Nenhuma categoria encontrada</p>
+            <p className="text-sm text-gray-400">Tente buscar por outro termo</p>
+          </div>
+        )}
+      </div>
+
+      <MobileNavigation currentPage="social" />
+    </div>
+  );
+};
+
+export default Restaurantes;

@@ -295,9 +295,6 @@ const CheckIn = () => {
                           <div className="text-xs text-muted-foreground mt-1">{friend.time}</div>
                         </div>
                         <div className="flex flex-col items-end space-y-2">
-                          <Badge variant="accept" className="text-xs">
-                            Conta aberta
-                          </Badge>
                           <Button variant="ghost" size="sm" className="text-xs h-7">
                             Ver local
                           </Button>

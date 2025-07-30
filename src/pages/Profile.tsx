@@ -170,7 +170,7 @@ const Profile = () => {
               </>
             )}
             <div className="flex items-center space-x-1.5 mt-1">
-              <Badge className="bg-emerald-500/20 text-primary-foreground text-xs border-emerald-300/50 h-5 px-2">
+              <Badge className="bg-primary-foreground/20 text-primary-foreground text-xs h-5 px-2">
                 ✓ Conectável
               </Badge>
               <Badge className="bg-primary-foreground/20 text-primary-foreground text-xs h-5 px-2">

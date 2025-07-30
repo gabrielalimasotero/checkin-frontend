@@ -4,164 +4,337 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Calendar, Clock, Users, MapPin, Check, X, Heart, Utensils, Share, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Check, X, Heart, Calendar, UserPlus } from 'lucide-react';
 
 const Notifications = () => {
   const navigate = useNavigate();
 
-  const handleRSVP = (eventId: number, response: 'yes' | 'no') => {
-    console.log(`RSVP ${response} para evento ${eventId}`);
+  const handleAcceptInvitation = (invitationId: number) => {
+    console.log(`Aceitar convite ${invitationId}`);
   };
 
-  const handleShareToWhatsApp = (eventId: number) => {
-    console.log(`Compartilhar evento ${eventId} no WhatsApp`);
+  const handleDeclineInvitation = (invitationId: number) => {
+    console.log(`Recusar convite ${invitationId}`);
   };
 
-  // Updated urgent invitations with new styling
-  const urgentInvitations = [
+  const handleAcceptConnection = (connectionId: number) => {
+    console.log(`Aceitar conexão ${connectionId}`);
+  };
+
+  const handleDeclineConnection = (connectionId: number) => {
+    console.log(`Recusar conexão ${connectionId}`);
+  };
+
+  // Check-ins públicos de amigos
+  const friendCheckins = [
     {
       id: 1,
-      type: 'invitation',
-      host: "Júlia",
-      title: "niver adiantado!!",
-      venue: "Casa da Júlia",
-      date: "Hoje",
-      time: "18:00",
-      urgency: 'happening_now'
-    }
-  ];
-
-  const interestNotifications = [
+      friend: {
+        name: "Ana Costa",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
+      },
+      venue: "Bar do João",
+      time: "há 5 min",
+      isPublic: true
+    },
     {
       id: 2,
-      type: 'promotion',
-      title: 'Promoção em um dos seus favoritos!',
-      restaurant: 'Restaurante Bella Vista',
-      promotion: '20% de desconto em pratos principais',
-      validUntil: 'até amanhã',
-      image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop',
-      urgency: 'medium'
+      friend: {
+        name: "João Santos",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+      },
+      venue: "Café Central",
+      time: "há 15 min",
+      isPublic: true
     },
     {
       id: 3,
-      type: 'interest_match',
-      title: 'Evento baseado nos seus interesses',
-      event: 'Champions League no Sports Bar',
-      match: 'Real Madrid vs Barcelona',
-      time: 'hoje às 21:00',
-      venue: 'Sports Bar Champions',
-      rsvpCount: 15,
-      urgency: 'medium'
+      friend: {
+        name: "Maria Silva",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+      },
+      venue: "Pizzaria Bella Vista",
+      time: "há 30 min",
+      isPublic: true
+    }
+  ];
+
+  // Convites recebidos
+  const invitations = [
+    {
+      id: 1,
+      host: {
+        name: "Júlia",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+      },
+      title: "Festa de aniversário",
+      venue: "Casa da Júlia",
+      date: "Hoje",
+      time: "20:00",
+      urgency: 'happening_soon'
+    },
+    {
+      id: 2,
+      host: {
+        name: "Pedro Lima",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+      },
+      title: "Happy Hour",
+      venue: "Bar Esportivo",
+      date: "Amanhã",
+      time: "18:00",
+      urgency: 'normal'
+    },
+    {
+      id: 3,
+      host: {
+        name: "Carlos",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+      },
+      title: "Show de Jazz",
+      venue: "Café Blues",
+      date: "Sábado",
+      time: "21:00",
+      urgency: 'normal'
+    }
+  ];
+
+  // Solicitações de amizade e conexão
+  const connectionRequests = [
+    {
+      id: 1,
+      person: {
+        name: "Marina Santos",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+      },
+      type: "friendship",
+      mutualFriends: 3,
+      time: "há 2h"
+    },
+    {
+      id: 2,
+      person: {
+        name: "Rafael Costa",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
+      },
+      type: "connection",
+      mutualInterests: ["Música", "Esportes"],
+      time: "há 1h"
+    },
+    {
+      id: 3,
+      person: {
+        name: "Fernanda Lima",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
+      },
+      type: "friendship",
+      mutualFriends: 5,
+      time: "há 30 min"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-checkin-pearl-50 max-w-sm mx-auto">
+    <div className="h-screen bg-background max-w-sm mx-auto flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-checkin-turquoise-500 to-checkin-ocean-600 shadow-sm p-4 sticky top-0 z-10">
+      <div className="bg-white border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => navigate('/home')}
-            className="p-2 text-white hover:bg-white/20"
+            className="p-2"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-bold text-white">Notificações</h1>
+          <h1 className="text-lg font-bold">Notificações</h1>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Convites Acontecendo Agora */}
-        {urgentInvitations.map((invitation) => (
-          <div key={invitation.id} className="bg-gradient-to-r from-checkin-turquoise-50 to-checkin-ocean-50 border border-checkin-turquoise-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <Badge className="bg-checkin-turquoise-500 text-white text-xs">ACONTECENDO AGORA</Badge>
-              <span className="text-xs text-checkin-turquoise-700 font-medium">{invitation.date}</span>
-            </div>
-            <h4 className="font-medium text-checkin-turquoise-800 text-sm mb-1">
-              {invitation.host} convidou você: {invitation.title}
-            </h4>
-            <div className="text-xs text-checkin-turquoise-700 mb-3">
-              <span>📍 {invitation.venue}</span>
-              <span className="ml-3">🕒 {invitation.time}</span>
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={() => handleRSVP(invitation.id, 'no')}
-                className="flex-1 text-xs h-7 border-checkin-turquoise-300 text-checkin-turquoise-700"
-              >
-                Não vou
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => handleRSVP(invitation.id, 'yes')}
-                className="flex-1 text-xs h-7 bg-checkin-turquoise-600 hover:bg-checkin-turquoise-700"
-              >
-                <Check className="w-3 h-3 mr-1" />
-                Confirmar
-              </Button>
-            </div>
-          </div>
-        ))}
-
-        {/* Baseado nos seus interesses */}
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-checkin-pearl-200">
-          <h3 className="font-semibold mb-3 flex items-center text-checkin-ocean-700">
-            <Heart className="w-4 h-4 mr-2" />
-            Baseado nos seus interesses
-          </h3>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-6 pb-20">
+        {/* Check-ins públicos de amigos */}
+        {friendCheckins.length > 0 && (
           <div className="space-y-3">
-            {interestNotifications.map((notification) => (
-              <div key={notification.id} className="border rounded-lg p-3 border-checkin-pearl-200">
-                {notification.type === 'promotion' && (
-                  <>
-                    <div className="flex items-start space-x-3 mb-2">
-                      <img 
-                        src={notification.image} 
-                        alt={notification.restaurant}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div className="flex-1">
-                        <Badge className="text-xs bg-green-100 text-green-700 mb-1">PROMOÇÃO</Badge>
-                        <h4 className="font-medium text-sm text-checkin-ocean-700">{notification.title}</h4>
-                        <p className="text-sm text-checkin-ocean-600">{notification.restaurant}</p>
-                        <p className="text-sm font-medium text-green-600">{notification.promotion}</p>
-                        <p className="text-xs text-checkin-ocean-400">{notification.validUntil}</p>
-                      </div>
+            <h3 className="text-base font-semibold flex items-center text-foreground">
+              <MapPin className="w-4 h-4 mr-2 text-primary" />
+              Check-ins de amigos
+            </h3>
+            {friendCheckins.map((checkin) => (
+              <div key={checkin.id} className="bg-white rounded-lg p-4 shadow-sm border border-border">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={checkin.friend.avatar} alt={checkin.friend.name} />
+                    <AvatarFallback>{checkin.friend.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">
+                      {checkin.friend.name} fez check-in
                     </div>
-                    <Button size="sm" className="w-full text-xs bg-checkin-turquoise-500 hover:bg-checkin-turquoise-600">
-                      <Utensils className="w-3 h-3 mr-1" />
-                      Ver no restaurante
-                    </Button>
-                  </>
-                )}
-                
-                {notification.type === 'interest_match' && (
-                  <>
-                    <Badge className="text-xs bg-blue-100 text-blue-700 mb-2">SEUS INTERESSES</Badge>
-                    <h4 className="font-medium text-sm mb-1 text-checkin-ocean-700">{notification.title}</h4>
-                    <p className="text-sm text-checkin-ocean-600 mb-1">{notification.match}</p>
-                    <div className="text-xs text-checkin-ocean-500 mb-2">
-                      <span>📍 {notification.venue} • 🕒 {notification.time}</span>
+                    <div className="text-sm text-muted-foreground">
+                      📍 {checkin.venue}
                     </div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Users className="w-3 h-3 text-checkin-ocean-500" />
-                      <span className="text-xs text-checkin-ocean-600">{notification.rsvpCount} pessoas conectáveis</span>
+                    <div className="text-xs text-muted-foreground">
+                      ⏰ {checkin.time}
                     </div>
-                    <Button size="sm" className="w-full text-xs bg-checkin-turquoise-500 hover:bg-checkin-turquoise-600">
-                      <Check className="w-3 h-3 mr-1" />
-                      Confirmar presença
-                    </Button>
-                  </>
-                )}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/venue/${checkin.venue.toLowerCase().replace(/\s+/g, '-')}`)}
+                  >
+                    Ver
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
+        )}
+
+        {/* Convites recebidos */}
+        {invitations.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold flex items-center text-foreground">
+              <Calendar className="w-4 h-4 mr-2 text-primary" />
+              Convites recebidos
+            </h3>
+            {invitations.map((invitation) => (
+              <div key={invitation.id} className={`bg-white rounded-lg p-4 shadow-sm border ${
+                invitation.urgency === 'happening_soon' 
+                  ? 'border-orange-200 bg-orange-50/50' 
+                  : 'border-border'
+              }`}>
+                <div className="flex items-start space-x-3 mb-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={invitation.host.avatar} alt={invitation.host.name} />
+                    <AvatarFallback>{invitation.host.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="text-sm font-medium text-foreground">
+                        {invitation.host.name} convidou você
+                      </span>
+                      {invitation.urgency === 'happening_soon' && (
+                        <Badge className="text-xs bg-orange-100 text-orange-700">
+                          ACONTECENDO EM BREVE
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-sm font-medium text-foreground mb-1">
+                      {invitation.title}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      📍 {invitation.venue}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      📅 {invitation.date} • ⏰ {invitation.time}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleDeclineInvitation(invitation.id)}
+                    className="flex-1 text-xs h-8"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Recusar
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAcceptInvitation(invitation.id)}
+                    className="flex-1 text-xs h-8"
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    Aceitar
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Solicitações de amizade e conexão */}
+        {connectionRequests.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold flex items-center text-foreground">
+              <UserPlus className="w-4 h-4 mr-2 text-primary" />
+              Solicitações
+            </h3>
+            {connectionRequests.map((request) => (
+              <div key={request.id} className="bg-white rounded-lg p-4 shadow-sm border border-border">
+                <div className="flex items-start space-x-3 mb-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={request.person.avatar} alt={request.person.name} />
+                    <AvatarFallback>{request.person.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground mb-1">
+                      {request.person.name}
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {request.type === 'friendship' ? 'quer ser seu amigo' : 'quer se conectar'}
+                    </div>
+                    {request.type === 'friendship' && (
+                      <div className="text-xs text-muted-foreground">
+                        👥 {request.mutualFriends} amigos em comum
+                      </div>
+                    )}
+                    {request.type === 'connection' && (
+                      <div className="text-xs text-muted-foreground">
+                        💡 Interesses: {request.mutualInterests.join(', ')}
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground">
+                      ⏰ {request.time}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleDeclineConnection(request.id)}
+                    className="flex-1 text-xs h-8"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Recusar
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAcceptConnection(request.id)}
+                    className="flex-1 text-xs h-8"
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    Aceitar
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Estado vazio */}
+        {friendCheckins.length === 0 && invitations.length === 0 && connectionRequests.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-base font-semibold mb-2">Nenhuma notificação</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Você está em dia! Novas notificações aparecerão aqui.
+            </p>
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/social')}
+            >
+              Explorar pessoas
+            </Button>
+          </div>
+        )}
         </div>
       </div>
     </div>

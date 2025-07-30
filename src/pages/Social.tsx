@@ -68,7 +68,7 @@ const Social = () => {
       icon: Utensils,
       count: 247,
       image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=150&fit=crop",
-      gradient: "from-checkin-coral-400 to-checkin-warm-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: true,
       route: "/restaurantes"
     },
@@ -78,7 +78,7 @@ const Social = () => {
       icon: Music,
       count: 203,
       image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=200&h=150&fit=crop",
-      gradient: "from-checkin-ocean-400 to-checkin-turquoise-500",
+      gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: true
     },
     {
@@ -87,7 +87,7 @@ const Social = () => {
       icon: Calendar,
       count: 89,
       image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=150&fit=crop",
-      gradient: "from-checkin-warm-400 to-checkin-coral-500",
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
@@ -96,7 +96,7 @@ const Social = () => {
       icon: Music,
       count: 156,
       image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=150&fit=crop",
-      gradient: "from-checkin-sage-400 to-checkin-ocean-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     },
     {
@@ -105,7 +105,7 @@ const Social = () => {
       icon: Coffee,
       count: 78,
       image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&h=150&fit=crop",
-      gradient: "from-checkin-coral-500 to-checkin-warm-500",
+      gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: false
     },
     {
@@ -114,7 +114,7 @@ const Social = () => {
       icon: Percent,
       count: 124,
       image: "https://images.unsplash.com/photo-1607083206869-4c7d0c21e65c?w=200&h=150&fit=crop",
-      gradient: "from-checkin-coral-400 to-checkin-warm-600",
+      gradient: "from-checkin-primary-400 to-checkin-primary-800",
       clickable: false
     },
     {
@@ -123,7 +123,7 @@ const Social = () => {
       icon: Cookie,
       count: 45,
       image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=150&fit=crop",
-      gradient: "from-checkin-warm-300 to-checkin-coral-400",
+      gradient: "from-checkin-primary-200 to-checkin-primary-400",
       clickable: false
     },
     {
@@ -132,7 +132,7 @@ const Social = () => {
       icon: ChefHat,
       count: 67,
       image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=150&fit=crop",
-      gradient: "from-checkin-warm-400 to-checkin-coral-500",
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
@@ -141,7 +141,7 @@ const Social = () => {
       icon: IceCream,
       count: 32,
       image: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=200&h=150&fit=crop",
-      gradient: "from-checkin-ocean-300 to-checkin-turquoise-400",
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
@@ -150,7 +150,7 @@ const Social = () => {
       icon: IceCream,
       count: 28,
       image: "https://images.unsplash.com/photo-1605801234031-3d5ad5b51c52?w=200&h=150&fit=crop",
-      gradient: "from-checkin-sage-400 to-checkin-ocean-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     }
   ];

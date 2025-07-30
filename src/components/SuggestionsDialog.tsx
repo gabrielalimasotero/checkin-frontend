@@ -26,11 +26,19 @@ const SuggestionsDialog = ({ isOpen, onClose }: SuggestionsDialogProps) => {
   ];
 
   const toggleFilter = (filterId: string) => {
-    setSelectedFilters(prev => 
-      prev.includes(filterId) 
+    setSelectedFilters(prev => {
+      const newFilters = prev.includes(filterId) 
         ? prev.filter(f => f !== filterId)
-        : [...prev, filterId]
-    );
+        : [...prev, filterId];
+      
+      // Clear route fields if "route" filter is removed
+      if (filterId === "route" && !newFilters.includes("route")) {
+        setStartLocation("");
+        setEndLocation("");
+      }
+      
+      return newFilters;
+    });
   };
 
   const applyFilters = () => {
@@ -49,27 +57,29 @@ const SuggestionsDialog = ({ isOpen, onClose }: SuggestionsDialogProps) => {
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Route Selection */}
-          <Card className="p-3">
-            <h4 className="font-medium text-sm mb-3 flex items-center">
-              <MapPin className="w-4 h-4 mr-2" />
-              Destino (opcional)
-            </h4>
-            <div className="space-y-2">
-              <Input
-                placeholder="De onde você está saindo..."
-                value={startLocation}
-                onChange={(e) => setStartLocation(e.target.value)}
-                className="text-sm"
-              />
-              <Input
-                placeholder="Para onde você vai..."
-                value={endLocation}
-                onChange={(e) => setEndLocation(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-          </Card>
+          {/* Route Selection - Only show when "No caminho" is selected */}
+          {selectedFilters.includes("route") && (
+            <Card className="p-3">
+              <h4 className="font-medium text-sm mb-3 flex items-center">
+                <MapPin className="w-4 h-4 mr-2" />
+                De onde está saindo e para onde vai
+              </h4>
+              <div className="space-y-2">
+                <Input
+                  placeholder="De onde você está saindo..."
+                  value={startLocation}
+                  onChange={(e) => setStartLocation(e.target.value)}
+                  className="text-sm"
+                />
+                <Input
+                  placeholder="Para onde você vai..."
+                  value={endLocation}
+                  onChange={(e) => setEndLocation(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+            </Card>
+          )}
 
           {/* Filter Options */}
           <Card className="p-3">

@@ -14,6 +14,7 @@ import VenueDetails from "./pages/VenueDetails";
 import BotecoDaMariaProfile from "./pages/BotecoDaMariaProfile";
 import Status from "./pages/Status";
 import Notifications from "./pages/Notifications";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/venue/boteco-da-maria" element={<BotecoDaMariaProfile />} />
                 <Route path="/status" element={<Status />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

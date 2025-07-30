@@ -3,12 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Bell, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import MessagesDialog from "./MessagesDialog";
 
 const TopHeader = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
-  const [showMessages, setShowMessages] = useState(false);
 
   return (
     <div className="bg-white border-b border-border sticky top-0 z-50">
@@ -36,7 +34,7 @@ const TopHeader = () => {
               variant="ghost" 
               size="sm" 
               className="p-2"
-              onClick={() => setShowMessages(true)}
+              onClick={() => navigate('/messages')}
             >
               <MessageSquare className="w-5 h-5" />
             </Button>
@@ -54,8 +52,6 @@ const TopHeader = () => {
           </div>
         </div>
       </div>
-      
-      <MessagesDialog open={showMessages} onOpenChange={setShowMessages} />
     </div>
   );
 };

@@ -38,8 +38,7 @@ const NetworkTab = () => {
       likes: 8,
       comments: 5,
       location: "Sushi Zen",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1563612192-facf969b0a94?w=400&h=300&fit=crop"
+      rating: 5
     },
     {
       id: 3,
@@ -117,16 +116,6 @@ const NetworkTab = () => {
                   <span className="text-sm font-semibold">{post.user.name}</span>
                   {post.user.verified && (
                     <Verified className="w-4 h-4 text-primary" />
-                  )}
-                  {post.type === "checkin" && (
-                    <Badge className="text-xs bg-green-100 text-green-700">
-                      CHECK-IN
-                    </Badge>
-                  )}
-                  {post.type === "review" && (
-                    <Badge className="text-xs bg-blue-100 text-blue-700">
-                      AVALIAÇÃO
-                    </Badge>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground flex items-center">

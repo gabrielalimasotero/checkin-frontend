@@ -19,7 +19,7 @@ const Restaurantes = () => {
       name: "Melhores Avaliados",
       count: 156,
       image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=150&fit=crop",
-      gradient: "from-yellow-400 to-orange-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Top restaurantes da cidade",
       icon: Award
     },
@@ -28,7 +28,7 @@ const Restaurantes = () => {
       name: "Brasileira",
       count: 89,
       image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&h=150&fit=crop",
-      gradient: "from-green-400 to-yellow-500",
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Sabores tradicionais do Brasil",
       icon: Heart
     },
@@ -37,7 +37,7 @@ const Restaurantes = () => {
       name: "Saudável",
       count: 67,
       image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=150&fit=crop",
-      gradient: "from-green-400 to-emerald-500",
+      gradient: "from-checkin-primary-200 to-checkin-primary-400",
       description: "Opções naturais e nutritivas",
       icon: Salad
     },
@@ -46,7 +46,7 @@ const Restaurantes = () => {
       name: "Hamburguerias",
       count: 123,
       image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=150&fit=crop",
-      gradient: "from-yellow-400 to-orange-500",
+      gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Os melhores burgers da cidade",
       icon: Utensils
     },
@@ -55,7 +55,7 @@ const Restaurantes = () => {
       name: "Pizzarias",
       count: 156,
       image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
-      gradient: "from-red-400 to-yellow-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Pizzas artesanais e tradicionais",
       icon: Utensils
     },
@@ -64,7 +64,7 @@ const Restaurantes = () => {
       name: "Italiana",
       count: 67,
       image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
-      gradient: "from-red-400 to-green-500",
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Autêntica culinária italiana",
       icon: Utensils
     },
@@ -73,7 +73,7 @@ const Restaurantes = () => {
       name: "Japonesa",
       count: 94,
       image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=200&h=150&fit=crop",
-      gradient: "from-pink-400 to-red-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-800",
       description: "Sushi, sashimi e pratos nipônicos",
       icon: Utensils
     },
@@ -82,7 +82,7 @@ const Restaurantes = () => {
       name: "Chinesa",
       count: 78,
       image: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=200&h=150&fit=crop",
-      gradient: "from-yellow-400 to-red-500",
+      gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Tradições culinárias chinesas",
       icon: Utensils
     },
@@ -91,7 +91,7 @@ const Restaurantes = () => {
       name: "Frutos do Mar",
       count: 45,
       image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=200&h=150&fit=crop",
-      gradient: "from-blue-400 to-teal-500",
+      gradient: "from-checkin-primary-300 to-checkin-primary-600",
       description: "Especialidades marinhas",
       icon: Utensils
     },
@@ -100,14 +100,14 @@ const Restaurantes = () => {
       name: "Fast Food",
       count: 89,
       image: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&h=150&fit=crop",
-      gradient: "from-orange-400 to-red-500",
+      gradient: "from-checkin-primary-400 to-checkin-primary-700",
       description: "Opções rápidas e saborosas",
       icon: Utensils
     }
   ];
 
   return (
-    <div className="mobile-viewport bg-checkin-pearl-50 flex flex-col">
+    <div className="mobile-viewport bg-background flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm p-3 sticky top-0 z-10">
         <div className="flex items-center space-x-3 mb-3">
@@ -119,18 +119,18 @@ const Restaurantes = () => {
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div className="w-8 h-8 bg-gradient-to-br from-checkin-coral-400 to-checkin-warm-500 rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 bg-gradient-to-br from-checkin-primary-400 to-checkin-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
             <Utensils className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-lg font-bold text-checkin-deep-700">Restaurantes</h1>
-            <p className="text-xs text-checkin-slate-500">Explore por categoria e tipo</p>
+            <h1 className="text-lg font-bold text-foreground">Restaurantes</h1>
+            <p className="text-xs text-muted-foreground">Explore por categoria e tipo</p>
           </div>
         </div>
 
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Buscar categoria ou tipo..."
             value={searchQuery}
@@ -174,9 +174,9 @@ const Restaurantes = () => {
           cuisine.description.toLowerCase().includes(searchQuery.toLowerCase())
         ).length === 0 && (
           <div className="text-center py-8">
-            <Utensils className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Nenhuma categoria encontrada</p>
-            <p className="text-sm text-gray-400">Tente buscar por outro termo</p>
+            <Utensils className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">Nenhuma categoria encontrada</p>
+            <p className="text-sm text-muted-foreground">Tente buscar por outro termo</p>
           </div>
         )}
       </div>

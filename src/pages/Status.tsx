@@ -81,9 +81,9 @@ const Status = () => {
   };
 
   return (
-    <div className="min-h-screen bg-checkin-pearl-50 max-w-sm mx-auto">
+    <div className="min-h-screen bg-background max-w-sm mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-checkin-turquoise-500 to-checkin-ocean-600 shadow-sm p-4 sticky top-0 z-10">
+      <div className="bg-gradient-to-r from-checkin-primary-500 to-checkin-primary-700 shadow-sm p-4 sticky top-0 z-10">
         <div className="flex items-center space-x-3">
           <Button 
             variant="ghost" 
@@ -99,31 +99,31 @@ const Status = () => {
 
       <div className="p-4">
         {/* Compositor de Status */}
-        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-checkin-pearl-200">
+        <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-border">
           <div className="flex items-start space-x-3">
             <Avatar className="w-10 h-10">
               <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face" />
               <AvatarFallback>EU</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <div className="bg-checkin-pearl-50 rounded-xl p-3 mb-3">
+              <div className="bg-muted rounded-xl p-3 mb-3">
                 <textarea
                   value={statusInput}
                   onChange={(e) => setStatusInput(e.target.value)}
                   placeholder="No que você está pensando?"
-                  className="w-full bg-transparent resize-none text-sm placeholder-checkin-ocean-400 focus:outline-none"
+                  className="w-full bg-transparent resize-none text-sm placeholder-muted-foreground focus:outline-none"
                   rows={3}
                 />
               </div>
               <div className="flex justify-between items-center">
-                <div className="text-xs text-checkin-ocean-400">
+                <div className="text-xs text-muted-foreground">
                   {statusInput.length}/280
                 </div>
                 <Button 
                   size="sm" 
                   onClick={handlePostStatus}
                   disabled={!statusInput.trim()}
-                  className="bg-checkin-turquoise-500 hover:bg-checkin-turquoise-600 text-white px-4"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-4"
                 >
                   Postar
                 </Button>
@@ -135,7 +135,7 @@ const Status = () => {
         {/* Feed de Status */}
         <div className="space-y-4">
           {statusFeed.map((post) => (
-            <div key={post.id} className="bg-white rounded-lg p-4 shadow-sm border border-checkin-pearl-200">
+            <div key={post.id} className="bg-white rounded-lg p-4 shadow-sm border border-border">
               <div className="flex items-start space-x-3">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={post.user.avatar} alt={post.user.name} />
@@ -144,38 +144,38 @@ const Status = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-sm text-checkin-ocean-700">
+                      <span className="font-medium text-sm text-foreground">
                         {post.user.name}
                       </span>
                       {post.user.verified && (
-                        <div className="w-4 h-4 bg-checkin-turquoise-500 rounded-full flex items-center justify-center">
+                        <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                           <span className="text-white text-xs">✓</span>
                         </div>
                       )}
-                      <span className="text-xs text-checkin-ocean-400">•</span>
-                      <span className="text-xs text-checkin-ocean-400">{post.time}</span>
+                                        <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground">{post.time}</span>
                     </div>
                     <Button variant="ghost" size="sm" className="p-1">
-                      <MoreHorizontal className="w-4 h-4 text-checkin-ocean-400" />
+                      <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                     </Button>
                   </div>
                   
-                  <p className="text-sm text-checkin-ocean-700 mb-2">{post.content}</p>
+                  <p className="text-sm text-foreground mb-2">{post.content}</p>
                   
                   {post.location && (
-                    <p className="text-xs text-checkin-ocean-400 mb-2">📍 {post.location}</p>
+                    <p className="text-xs text-muted-foreground mb-2">📍 {post.location}</p>
                   )}
                   
-                  <div className="flex items-center space-x-4 text-checkin-ocean-400">
-                    <Button variant="ghost" size="sm" className="p-1 hover:text-checkin-turquoise-600">
+                  <div className="flex items-center space-x-4 text-muted-foreground">
+                    <Button variant="ghost" size="sm" className="p-1 hover:text-primary">
                       <Heart className="w-4 h-4 mr-1" />
                       <span className="text-xs">{post.likes}</span>
                     </Button>
-                    <Button variant="ghost" size="sm" className="p-1 hover:text-checkin-turquoise-600">
+                    <Button variant="ghost" size="sm" className="p-1 hover:text-primary">
                       <MessageSquare className="w-4 h-4 mr-1" />
                       <span className="text-xs">{post.comments}</span>
                     </Button>
-                    <Button variant="ghost" size="sm" className="p-1 hover:text-checkin-turquoise-600">
+                    <Button variant="ghost" size="sm" className="p-1 hover:text-primary">
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>

@@ -3,8 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, EyeOff, Receipt, ChefHat, CheckCircle2, Clock, MapPin, ExternalLink, Plus, Star } from "lucide-react";
+import { Users, EyeOff, Receipt, ChefHat, CheckCircle2, Clock, MapPin, ExternalLink, Plus, Star, Eye, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { 
+  COMPONENT_VARIANTS, 
+  COMMON_CLASSES, 
+  LAYOUT,
+  INTERACTIVE 
+} from '@/lib/design-system';
 
 interface StatusTabProps {
   peopleHere: Array<{
@@ -98,11 +104,11 @@ const StatusTab = ({
   const getStatusText = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'Entregue';
+        return "Entregue";
       case 'preparing':
-        return 'Preparando';
+        return "Preparando";
       default:
-        return 'Pendente';
+        return "Pendente";
     }
   };
 
@@ -111,11 +117,11 @@ const StatusTab = ({
   };
 
   const handleVenueClick = () => {
-    navigate('/venue/boteco-da-maria');
+    navigate('/venue-details');
   };
 
   const handleAddItems = () => {
-    navigate('/checkin?tab=cardapio');
+    navigate('/menu');
   };
 
   const renderStars = (rating: number) => {
@@ -128,117 +134,138 @@ const StatusTab = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Check-in Ativo */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3 flex items-center">
-          Check-in ativo:
-        </h3>
-        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg mb-3">
-          <img 
-            src={currentCheckin.image} 
-            alt={currentCheckin.venue}
-            className="w-12 h-12 rounded-lg object-cover"
-          />
-          <div className="flex-1">
-            <h4 className="font-medium text-sm">{currentCheckin.venue}</h4>
-            <div className="flex items-center space-x-2 text-xs text-gray-600">
-              <Clock className="w-3 h-3" />
-              <span>{currentCheckin.time}</span>
-            </div>
-            <div className="flex items-center space-x-2 mt-1">
-              <Badge 
-                variant="accept"
-                className="text-xs"
-              >
-                {currentCheckin.status}
-              </Badge>
-              {currentCheckin.totalPaid > 0 && (
-                <span className="text-xs font-medium text-checkin-turquoise-600">
-                  R$ {currentCheckin.totalPaid.toFixed(2)}
-                </span>
+    <div className={LAYOUT.section}>
+      {/* Check-in Ativo - Layout mais vertical e harmonioso */}
+      <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-primary" />
+            Check-in Ativo
+          </h3>
+          <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+            {currentCheckin.status}
+          </Badge>
+        </div>
+        
+        <div className={`${COMPONENT_VARIANTS.padding.md} bg-white/80 rounded-xl border border-primary/20`}>
+          <div className="flex items-center space-x-4">
+            <img 
+              src={currentCheckin.image} 
+              alt={currentCheckin.venue}
+              className="w-16 h-16 rounded-xl object-cover shadow-sm"
+            />
+            <div className="flex-1">
+              <h4 className="text-base font-medium">{currentCheckin.venue}</h4>
+              <div className="flex items-center space-x-2 text-caption mt-1">
+                <Clock className="w-3 h-3" />
+                <span>{currentCheckin.time}</span>
+              </div>
+              <div className="flex items-center space-x-2 mt-2">
+                {currentCheckin.totalPaid > 0 && (
+                  <span className="text-xs font-medium text-primary">
+                    R$ {currentCheckin.totalPaid.toFixed(2)}
+                  </span>
+                )}
+              </div>
+              {currentCheckin.rating > 0 && (
+                <div className="flex items-center space-x-1 mt-2">
+                  {renderStars(currentCheckin.rating)}
+                </div>
               )}
             </div>
-            {currentCheckin.rating > 0 && (
-              <div className="flex items-center space-x-1 mt-1">
-                {renderStars(currentCheckin.rating)}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col space-y-1">
-            <Button variant="outline" size="sm" className="text-xs" onClick={handleVenueClick}>
-              Ver
-            </Button>
+            <div className="flex flex-col space-y-2">
+              <Button variant="outline" size="sm" className="text-xs h-8" onClick={handleVenueClick}>
+                <Eye className="w-3 h-3 mr-1" />
+                Ver
+              </Button>
+            </div>
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={onCheckIn}
-        >
-          <EyeOff className="w-4 h-4 mr-2" />
-          Ocultar check-in
-        </Button>
+        
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            className={`w-full h-12 ${COMPONENT_VARIANTS.button.outline}`}
+            onClick={onCheckIn}
+          >
+            <EyeOff className="w-4 h-4 mr-2" />
+            Ocultar check-in
+          </Button>
+        </div>
       </Card>
 
-      {/* Minha Conta */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3 flex items-center">
-          <Receipt className="w-5 h-5 mr-2" />
-          Minha Conta
-        </h3>
+      {/* Minha Conta - Layout mais vertical */}
+      <Card className={COMPONENT_VARIANTS.card.standard}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold flex items-center">
+            <Receipt className="w-5 h-5 mr-2 text-primary" />
+            Minha Conta
+          </h3>
+          <Badge variant="secondary" className="text-xs">
+            {accountBacklog.length} itens
+          </Badge>
+        </div>
         
         {accountBacklog.length > 0 ? (
-          <div className="space-y-3">
+          <div className={COMPONENT_VARIANTS.spacing.md}>
             {accountBacklog.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={item.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors`}>
                 <div className="flex items-center space-x-3">
-                  {getStatusIcon(item.status)}
-                  <div>
-                    <div className="font-medium text-sm">{item.item}</div>
-                    <div className="text-xs text-gray-500">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    {getStatusIcon(item.status)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{item.item}</div>
+                    <div className="text-caption">
                       Qtd: {item.quantity} • {item.time}
                     </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {getStatusText(item.status)}
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold text-sm">R$ {item.price.toFixed(2)}</div>
-                  <div className="text-xs text-gray-500">{getStatusText(item.status)}</div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-primary">R$ {item.price.toFixed(2)}</div>
+                  </div>
                 </div>
               </div>
             ))}
             
-            <div className="border-t pt-3 flex justify-between items-center">
-              <span className="font-semibold">Total:</span>
-              <span className="font-semibold text-checkin-turquoise-600">
-                R$ {getTotalBacklog().toFixed(2)}
-              </span>
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline"
-                className="flex-1"
-                onClick={handleAddItems}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar itens
-              </Button>
-              <Button 
-                className="flex-1 bg-gradient-to-r from-checkin-turquoise-500 to-checkin-petrol-600 hover:from-checkin-turquoise-600 hover:to-checkin-petrol-700"
-              >
-                Encerrar Conta
-              </Button>
+            <div className="border-t border-border/50 pt-4 mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm font-medium">Total:</span>
+                <span className="text-sm font-medium text-primary">
+                  R$ {getTotalBacklog().toFixed(2)}
+                </span>
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 h-10"
+                  onClick={handleAddItems}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar
+                </Button>
+                <Button 
+                  className={`flex-1 h-10 ${COMPONENT_VARIANTS.button.primary}`}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Pagar
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="text-center py-4">
-            <p className="text-gray-500 text-sm">Nenhum pedido ativo</p>
-            <p className="text-xs text-gray-400">Seus pedidos aparecerão aqui</p>
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Receipt className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <p className="text-caption text-muted-foreground mb-4">Nenhum item na conta</p>
             <Button 
-              variant="outline"
-              className="mt-3"
+              variant="outline" 
               onClick={handleAddItems}
+              className={COMPONENT_VARIANTS.button.outline}
             >
               <Plus className="w-4 h-4 mr-2" />
               Adicionar itens
@@ -247,90 +274,116 @@ const StatusTab = ({
         )}
       </Card>
 
-      {/* Quem está aqui agora */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3 flex items-center">
-          <Users className="w-5 h-5 mr-2" />
-          Estão aqui agora ({peopleCurrentlyHere.length})
-        </h3>
-        <div className="space-y-3">
-          {peopleCurrentlyHere.map((person) => (
-            <div key={person.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={person.avatar} />
-                  <AvatarFallback>{person.name[0]}</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">{person.name}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                {person.isTable && (
-                  <Badge variant="secondary" className="text-xs">
-                    🪑 Na mesa
-                  </Badge>
-                )}
-                <Button variant="outline" size="sm">
-                  👋
-                </Button>
-              </div>
-            </div>
-          ))}
+      {/* Pessoas Aqui - Layout mais vertical */}
+      <Card className={COMPONENT_VARIANTS.card.standard}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold flex items-center">
+            <Users className="w-5 h-5 mr-2 text-primary" />
+            Pessoas Aqui
+          </h3>
+          <Badge variant="secondary" className="text-xs">
+            {peopleCurrentlyHere.length}
+          </Badge>
         </div>
-      </Card>
-
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3 flex items-center">
-          <Users className="w-5 h-5 mr-2" />
-          Já foram ({peopleWhoLeft.length})
-        </h3>
-        <div className="space-y-3">
-          {peopleWhoLeft.map((person) => (
-            <div key={person.id} className="flex items-center justify-between">
+        
+        <div className={COMPONENT_VARIANTS.spacing.md}>
+          {peopleCurrentlyHere.map((person) => (
+            <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors`}>
               <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10 opacity-60">
-                  <AvatarImage src={person.avatar} />
-                  <AvatarFallback>{person.name[0]}</AvatarFallback>
+                <Avatar className="w-12 h-12">
+                  <AvatarImage src={person.avatar} alt={person.name} />
+                  <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <span className="font-medium text-gray-600">{person.name}</span>
-                  <div className="text-xs text-gray-400">Saiu {person.leftTime}</div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium">{person.name}</div>
+                  <div className="text-caption">
+                    {person.isTable ? 'Na mesa' : 'No local'}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end space-y-1">
+                  <Badge 
+                    variant={person.isTable ? "default" : "secondary"} 
+                    className="text-xs"
+                  >
+                    {person.isTable ? 'Mesa' : 'Local'}
+                  </Badge>
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="opacity-60">
-                💬
-              </Button>
             </div>
           ))}
         </div>
       </Card>
 
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3 flex items-center">
-          <Users className="w-5 h-5 mr-2" />
-          Pretendem vir ({peoplePlanningToCome.length})
-        </h3>
-        <div className="space-y-3">
-          {peoplePlanningToCome.map((person) => (
-            <div key={person.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={person.avatar} />
-                  <AvatarFallback>{person.name[0]}</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">{person.name}</span>
+      {/* Pessoas que Saíram - Layout mais vertical */}
+      {peopleWhoLeft.length > 0 && (
+        <Card className={COMPONENT_VARIANTS.card.standard}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold flex items-center">
+              <Users className="w-5 h-5 mr-2 text-muted-foreground" />
+              Pessoas que Saíram
+            </h3>
+            <Badge variant="secondary" className="text-xs">
+              {peopleWhoLeft.length}
+            </Badge>
+          </div>
+          
+          <div className={COMPONENT_VARIANTS.spacing.md}>
+            {peopleWhoLeft.map((person) => (
+              <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/20 rounded-lg opacity-75`}>
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={person.avatar} alt={person.name} />
+                    <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{person.name}</div>
+                    <div className="text-caption">
+                      Saiu {person.leftTime}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
-                  📅 RSVP
-                </Badge>
-                <Button variant="outline" size="sm">
-                  💬
-                </Button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Pessoas que Vão Vir - Layout mais vertical */}
+      {peoplePlanningToCome.length > 0 && (
+        <Card className={COMPONENT_VARIANTS.card.standard}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-orange-500" />
+              Vão Vir
+            </h3>
+            <Badge variant="secondary" className="text-xs">
+              {peoplePlanningToCome.length}
+            </Badge>
+          </div>
+          
+          <div className={COMPONENT_VARIANTS.spacing.md}>
+            {peoplePlanningToCome.map((person) => (
+              <div key={person.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-orange-300 rounded-lg bg-orange-50/50`}>
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={person.avatar} alt={person.name} />
+                    <AvatarFallback>{person.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{person.name}</div>
+                    <div className="text-caption">
+                      Confirmado para vir
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                    RSVP
+                  </Badge>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

@@ -5,12 +5,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star } from "lucide-react";
+import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Plus, Eye, CheckCircle2 } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
 import MyCheckInsTab from "@/components/MyCheckInsTab";
 import StatusTab from "@/components/StatusTab";
 import OrderTab from "@/components/OrderTab";
 import CheckInDialogs from "@/components/CheckInDialogs";
+import { 
+  COMPONENT_VARIANTS, 
+  COMMON_CLASSES, 
+  LAYOUT,
+  INTERACTIVE 
+} from '@/lib/design-system';
 
 const CheckIn = () => {
   const navigate = useNavigate();
@@ -224,188 +230,262 @@ const CheckIn = () => {
 
   return (
     <div className="mobile-viewport bg-background flex flex-col">
-      {/* Header sem localização */}
-      <div className="bg-white shadow-sm p-4 sticky top-0 z-10">
-        <h1 className="text-lg font-bold text-primary">Check-in</h1>
+      {/* Header com gradiente e melhor proporção */}
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-b border-border/50">
+        <div className={`${LAYOUT.container} ${COMPONENT_VARIANTS.padding.lg}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-bold text-primary mb-1">Check-in</h1>
+              <p className="text-caption">Gerencie suas experiências</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="rounded-full w-10 h-10 p-0"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 pb-20">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="geral">Geral</TabsTrigger>
-            <TabsTrigger value="historico">Histórico</TabsTrigger>
-            <TabsTrigger value="ativo">Ativo</TabsTrigger>
-          </TabsList>
+      {/* Conteúdo principal com melhor espaçamento */}
+      <div className="flex-1 overflow-y-auto">
+        <div className={`${LAYOUT.container} ${COMPONENT_VARIANTS.padding.lg} pb-24`}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className={LAYOUT.section}>
+            {/* Tabs com melhor proporção */}
+            <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50">
+              <TabsTrigger value="geral" className="text-sm font-medium">Geral</TabsTrigger>
+              <TabsTrigger value="historico" className="text-sm font-medium">Histórico</TabsTrigger>
+              <TabsTrigger value="ativo" className="text-sm font-medium">Ativo</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="geral">
-            <div className="space-y-4">
-              {/* Amigos com Contas Abertas */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center">
-                  <Activity className="w-5 h-5 mr-2" />
-                  Amigos com Conta Aberta
-                </h3>
-                <div className="space-y-3">
+            <TabsContent value="geral" className={LAYOUT.section}>
+              {/* Seção de Status Atual */}
+              <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold flex items-center">
+                    <Activity className="w-5 h-5 mr-2 text-primary" />
+                    Status Atual
+                  </h3>
+                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                    Ativo
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-base font-medium">Boteco da Maria</h4>
+                    <p className="text-caption">Mesa 8 • Desde 18:00</p>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Amigos com Contas Abertas - Layout mais vertical */}
+              <Card className={COMPONENT_VARIANTS.card.standard}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-primary" />
+                    Contas Abertas
+                  </h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {friendsWithOpenTabs.length}
+                  </Badge>
+                </div>
+                <div className={COMPONENT_VARIANTS.spacing.md}>
                   {friendsWithOpenTabs.map((friend) => (
-                    <div key={friend.id} className="flex items-center justify-between p-3 border-l-4 border-primary rounded-lg">
+                    <div key={friend.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-primary/30 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors`}>
                       <div className="flex items-center space-x-3">
                         <img 
                           src={friend.avatar} 
                           alt={friend.name} 
-                          className="w-10 h-10 rounded-full"
+                          className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
                         />
-                        <div>
-                          <div className="font-medium text-sm">{friend.name}</div>
-                          <div className="text-xs text-gray-500">{friend.venue} • {friend.time}</div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{friend.name}</div>
+                          <div className="text-caption">{friend.venue}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{friend.time}</div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="accept" className="text-xs">
-                          Conta aberta
-                        </Badge>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          Ver local
-                        </Button>
+                        <div className="flex flex-col items-end space-y-2">
+                          <Badge variant="accept" className="text-xs">
+                            Conta aberta
+                          </Badge>
+                          <Button variant="ghost" size="sm" className="text-xs h-7">
+                            Ver local
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </Card>
 
-              {/* Amigos que Finalizaram Hoje */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  Check-ins Finalizados Hoje
-                </h3>
-                <div className="space-y-3">
+              {/* Amigos que Finalizaram Hoje - Layout mais vertical */}
+              <Card className={COMPONENT_VARIANTS.card.standard}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold flex items-center">
+                    <CheckCircle2 className="w-5 h-5 mr-2 text-green-600" />
+                    Finalizados Hoje
+                  </h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {friendsCompletedToday.length}
+                  </Badge>
+                </div>
+                <div className={COMPONENT_VARIANTS.spacing.md}>
                   {friendsCompletedToday.map((friend) => (
-                    <div key={friend.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={friend.id} className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-green-300 rounded-lg bg-green-50/50 hover:bg-green-50 transition-colors`}>
                       <div className="flex items-center space-x-3">
                         <img 
                           src={friend.avatar} 
                           alt={friend.name} 
-                          className="w-10 h-10 rounded-full"
+                          className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
                         />
-                        <div>
-                          <div className="font-medium text-sm">{friend.name}</div>
-                          <div className="text-xs text-gray-500">{friend.venue} • {friend.time}</div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{friend.name}</div>
+                          <div className="text-caption">{friend.venue}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{friend.time}</div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="accept" className="text-xs">
-                          Finalizado
-                        </Badge>
-                        <Button variant="outline" size="sm" className="text-xs">
-                          Ver local
-                        </Button>
+                        <div className="flex flex-col items-end space-y-2">
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                            Finalizado
+                          </Badge>
+                          <Button variant="ghost" size="sm" className="text-xs h-7">
+                            Ver local
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </Card>
 
-              {/* Explorar Pessoas */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center">
-                  <Search className="w-5 h-5 mr-2" />
+              {/* Explorar Pessoas - Cards mais altos */}
+              <Card className={COMPONENT_VARIANTS.card.standard}>
+                <h3 className="text-base font-semibold flex items-center mb-4">
+                  <Search className="w-5 h-5 mr-2 text-primary" />
                   Explorar Pessoas
                 </h3>
-                <div className="space-y-2">
+                <div className={COMPONENT_VARIANTS.spacing.md}>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start text-sm"
+                    className={`w-full justify-start h-14 ${COMPONENT_VARIANTS.button.outline}`}
                     onClick={() => navigate('/social?tab=pessoas')}
                   >
-                    <Users className="w-4 h-4 mr-2" />
-                    Conhecer pessoas novas
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <Users className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Conhecer pessoas novas</div>
+                        <div className="text-caption">Descubra conexões próximas</div>
+                      </div>
+                    </div>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start text-sm"
+                    className={`w-full justify-start h-14 ${COMPONENT_VARIANTS.button.outline}`}
                     onClick={() => navigate('/social?tab=pessoas')}
                   >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Ver quem está próximo
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <MapPin className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Ver quem está próximo</div>
+                        <div className="text-caption">Pessoas na sua região</div>
+                      </div>
+                    </div>
                   </Button>
                 </div>
               </Card>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="historico">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 flex items-center">
-                <History className="w-5 h-5 mr-2" />
-                Histórico de Check-ins
-              </h3>
-              <div className="space-y-3">
-                {historicCheckins.map((checkin) => (
-                  <div key={checkin.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <img 
-                      src={checkin.image} 
-                      alt={checkin.venue}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm">{checkin.venue}</h4>
-                      <div className="flex items-center space-x-2 text-xs text-gray-600">
-                        <Clock className="w-3 h-3" />
-                        <span>{checkin.time}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge 
-                          variant={checkin.status === 'Ativo' ? 'accept' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {checkin.status}
-                        </Badge>
-                        {checkin.totalPaid > 0 && (
-                          <span className="text-xs font-medium text-primary">
-                            R$ {checkin.totalPaid.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                      {checkin.rating > 0 && (
-                        <div className="flex items-center space-x-1 mt-1">
-                          {renderStars(checkin.rating)}
+            <TabsContent value="historico" className={LAYOUT.section}>
+              <Card className={COMPONENT_VARIANTS.card.standard}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold flex items-center">
+                    <History className="w-5 h-5 mr-2 text-primary" />
+                    Histórico de Check-ins
+                  </h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {historicCheckins.length}
+                  </Badge>
+                </div>
+                <div className={COMPONENT_VARIANTS.spacing.md}>
+                  {historicCheckins.map((checkin) => (
+                    <div key={checkin.id} className={`${COMPONENT_VARIANTS.padding.md} bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors`}>
+                      <div className="flex items-center space-x-3">
+                        <img 
+                          src={checkin.image} 
+                          alt={checkin.venue}
+                          className="w-16 h-16 rounded-xl object-cover shadow-sm"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium">{checkin.venue}</h4>
+                          <div className="flex items-center space-x-2 text-caption mt-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{checkin.time}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge 
+                              variant={checkin.status === 'Ativo' ? 'accept' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {checkin.status}
+                            </Badge>
+                            {checkin.totalPaid > 0 && (
+                              <span className="text-xs font-medium text-primary">
+                                R$ {checkin.totalPaid.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          {checkin.rating > 0 && (
+                            <div className="flex items-center space-x-1 mt-2">
+                              {renderStars(checkin.rating)}
+                            </div>
+                          )}
                         </div>
-                      )}
+                        <div className="flex flex-col space-y-2">
+                          <Button variant="outline" size="sm" className="text-xs h-8">
+                            Ver
+                          </Button>
+                          {checkin.status === 'Finalizado' && checkin.rating === 0 && (
+                            <Button variant="outline" size="sm" className="text-xs h-8 text-yellow-600 border-yellow-300">
+                              Avaliar
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-col space-y-1">
-                      <Button variant="outline" size="sm" className="text-xs">
-                        Ver
-                      </Button>
-                      {checkin.status === 'Finalizado' && checkin.rating === 0 && (
-                        <Button variant="outline" size="sm" className="text-xs text-yellow-600">
-                          Avaliar
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </TabsContent>
+                  ))}
+                </div>
+              </Card>
+            </TabsContent>
 
-          <TabsContent value="ativo">
-            <StatusTab
-              peopleHere={peopleHere}
-              tableCode={tableCode}
-              setTableCode={setTableCode}
-              onCheckIn={handleCheckIn}
-              onRSVP={handleRSVP}
-            />
-          </TabsContent>
+            <TabsContent value="ativo" className={LAYOUT.section}>
+              <StatusTab
+                peopleHere={peopleHere}
+                tableCode={tableCode}
+                setTableCode={setTableCode}
+                onCheckIn={handleCheckIn}
+                onRSVP={handleRSVP}
+              />
+            </TabsContent>
 
-          <TabsContent value="cardapio">
-            <OrderTab
-              orderItems={orderItems}
-              setOrderItems={setOrderItems}
-              menuItems={menuItems}
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="cardapio" className={LAYOUT.section}>
+              <OrderTab
+                orderItems={orderItems}
+                setOrderItems={setOrderItems}
+                menuItems={menuItems}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       <CheckInDialogs

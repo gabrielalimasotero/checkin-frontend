@@ -10,6 +10,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
@@ -270,6 +271,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      console.log('🔄 Atualizando dados do usuário...');
+      if (supabaseUser?.id) {
+        await fetchUserProfile(supabaseUser.id);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -298,6 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithGoogle, 
         register, 
         logout, 
+        refreshUser,
         isLoading,
         isAuthenticated: !!supabaseUser
       }}

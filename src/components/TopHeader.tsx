@@ -1,12 +1,27 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Bell, MessageSquare } from "lucide-react";
+import { Search, Bell, MessageSquare, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const TopHeader = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [searchValue, setSearchValue] = useState("");
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/welcome');
+  };
 
   return (
     <div className="bg-white border-b border-border sticky top-0 z-50">
@@ -49,6 +64,31 @@ const TopHeader = () => {
                 <span className="text-xs text-white font-bold">3</span>
               </div>
             </Button>
+            
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={user?.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

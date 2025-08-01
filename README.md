@@ -35,6 +35,8 @@ CheckIn is a mobile-first social networking app built with React and TypeScript.
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Routing**: React Router DOM
 - **State Management**: React Query for server state
+- **Authentication**: Supabase Auth
+- **Database**: Supabase (PostgreSQL)
 - **Build Tool**: Vite
 - **UI Components**: Radix UI primitives with custom styling
 
@@ -57,6 +59,7 @@ src/
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
+- Conta no Supabase (para autenticação e banco de dados)
 
 ### Installation
 
@@ -68,9 +71,24 @@ cd checkin-frontend
 # Install dependencies
 npm install
 
+# Configure Supabase
+# 1. Crie um projeto no Supabase
+# 2. Execute o schema em database/schema_only.sql
+# 3. Configure as variáveis de ambiente (veja SUPABASE_SETUP.md)
+
 # Start development server
 npm run dev
 ```
+
+### Configuração do Supabase
+
+O projeto já está configurado com as credenciais do Supabase. Para começar:
+
+1. **Configuração Rápida**: Veja [QUICK_SETUP.md](./QUICK_SETUP.md)
+2. **Configuração Detalhada**: Veja [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+3. **Credenciais**: Veja [SUPABASE_CONFIG.md](./SUPABASE_CONFIG.md)
+
+**Importante**: Execute o schema `database/schema_only.sql` no Supabase antes de usar o app.
 
 ### Available Scripts
 

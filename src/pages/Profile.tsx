@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -33,9 +33,12 @@ import CreateGroupDialog from "@/components/CreateGroupDialog";
 
 const Profile = () => {
   const { user, logout } = useAuth();
+  
+  // Debug: log dos dados do usuário
+  console.log('🔍 Profile - Dados do usuário:', user);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("Carlos Mendonça");
+  const [editedName, setEditedName] = useState(user?.name || "Usuário");
   const [notifications, setNotifications] = useState(user?.preferences?.notifications ?? true);
   const [privacy, setPrivacy] = useState<"public" | "friends" | "community" | "anonymous">(user?.preferences?.privacy || "friends");
   
@@ -89,6 +92,13 @@ const Profile = () => {
   const removeGroup = (groupId: number) => {
     setUserGroups(prev => prev.filter(g => g.id !== groupId));
   };
+
+  // Atualizar editedName quando user mudar
+  useEffect(() => {
+    if (user?.name) {
+      setEditedName(user.name);
+    }
+  }, [user?.name]);
 
   // Stats
   const stats = {
@@ -148,8 +158,8 @@ const Profile = () => {
               />
             ) : (
               <>
-                <h2 className="text-lg font-bold truncate">Carlos Mendonça</h2>
-                <p className="text-primary-foreground/70 text-xs">carlos@email.com</p>
+                <h2 className="text-lg font-bold truncate">{user?.name || "Usuário"}</h2>
+                <p className="text-primary-foreground/70 text-xs">{user?.email || "email@example.com"}</p>
               </>
             )}
             <div className="flex items-center space-x-1.5 mt-1">

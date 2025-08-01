@@ -33,8 +33,8 @@ const Welcome = () => {
   }, [user, navigate]);
 
   const handleGoogleLogin = async () => {
-    const success = await loginWithGoogle();
-    if (success) {
+    const result = await loginWithGoogle();
+    if (result.success) {
       toast({
         title: "Login realizado!",
         description: "Bem-vindo ao CheckIn!",
@@ -43,7 +43,7 @@ const Welcome = () => {
     } else {
       toast({
         title: "Erro no login",
-        description: "Tente novamente.",
+        description: result.error || "Tente novamente.",
         variant: "destructive",
       });
     }
@@ -59,8 +59,8 @@ const Welcome = () => {
       return;
     }
 
-    const success = await login(formData.email, formData.password);
-    if (success) {
+    const result = await login(formData.email, formData.password);
+    if (result.success) {
       toast({
         title: "Login realizado!",
         description: "Bem-vindo de volta!",
@@ -69,7 +69,7 @@ const Welcome = () => {
     } else {
       toast({
         title: "Erro no login",
-        description: "Email ou senha incorretos.",
+        description: result.error || "Email ou senha incorretos.",
         variant: "destructive",
       });
     }
@@ -94,8 +94,8 @@ const Welcome = () => {
       return;
     }
 
-    const success = await register(formData.name, formData.email, formData.password);
-    if (success) {
+    const result = await register(formData.name, formData.email, formData.password);
+    if (result.success) {
       toast({
         title: "Conta criada!",
         description: "Bem-vindo ao CheckIn!",
@@ -104,7 +104,7 @@ const Welcome = () => {
     } else {
       toast({
         title: "Erro no cadastro",
-        description: "Tente novamente.",
+        description: result.error || "Tente novamente.",
         variant: "destructive",
       });
     }

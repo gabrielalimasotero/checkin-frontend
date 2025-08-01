@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";

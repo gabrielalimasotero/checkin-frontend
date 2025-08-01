@@ -35,16 +35,14 @@ import CreateGroupDialog from "@/components/CreateGroupDialog";
 const Profile = () => {
   const { user, logout, refreshUser } = useAuth();
   
-
-  
   // Debug: log dos dados do usuário
   console.log('🔍 Profile - Dados do usuário:', user);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || "Usuário");
-  const [notifications, setNotifications] = useState(user?.preferences?.notifications ?? true);
-  const [privacy, setPrivacy] = useState<"public" | "friends" | "community" | "anonymous">(user?.preferences?.privacy || "friends");
+  const [notifications, setNotifications] = useState(user?.notifications_enabled ?? true);
+  const [privacy, setPrivacy] = useState<"public" | "friends" | "community" | "anonymous">("friends");
   
   // New privacy settings
   const [profileVisibility, setProfileVisibility] = useState<"friends" | "network">("friends");
@@ -59,11 +57,33 @@ const Profile = () => {
   const [showBadgesDialog, setShowBadgesDialog] = useState(false);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   
-  
   // Interesses do usuário
   const [interests, setInterests] = useState<string[]>([]);
   const [showAddInterest, setShowAddInterest] = useState(false);
   const [newInterest, setNewInterest] = useState("");
+  const [isLoadingInterests, setIsLoadingInterests] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // Tags de interesses pré-definidas
+  const availableInterests = [
+    "Jazz ao vivo", "Música ambiente", "Voz e violão", "Sertanejo universitário", 
+    "Funk ao vivo", "Eletrônica leve", "Forró e piseiro", "Samba e pagode", 
+    "DJ residente", "Karaokê", "Música clássica", "Rock nacional", 
+    "Ambiente intimista", "Espaço descontraído", "Clima romântico", "Pet friendly", 
+    "Vista panorâmica", "Pôr do sol", "Rooftop", "Mesas compartilhadas", 
+    "Lounge ao ar livre", "Iluminação aconchegante", "Jogo de futebol ao vivo", 
+    "Transmissão de lutas (UFC, Boxe)", "Jogos de tabuleiro", "Mesa de sinuca", 
+    "Stand-up comedy", "Pub quiz", "Noite de talentos", "Open mic", 
+    "Exposição de arte", "Show de mágica", "Espaço gamer", "Ambiente climatizado", 
+    "Acessibilidade", "Reservas antecipadas", "Música ao vivo todos os dias", 
+    "Espaço instagramável", "Estacionamento próprio", "Busca lugar tranquilo", 
+    "Gosta de ambientes movimentados", "Curtir dançar", "Prefere locais reservados", 
+    "Interesse por esportes", "Interesse por cultura", "Vai pelo som", 
+    "Vai pela experiência", "Gosta de conversar", "Aprecia vista bonita"
+  ];
+  
+  // Estado para interesses temporários (antes de salvar)
+  const [tempSelectedInterests, setTempSelectedInterests] = useState<string[]>([]);
 
   // Grupos do usuário baseados em interesses
   const [userGroups, setUserGroups] = useState([
@@ -71,9 +91,19 @@ const Profile = () => {
     { id: 2, name: 'Grupo da Sinuca', interests: ['Sinuca', 'Jogos'], members: 6, role: 'membro', nextEvent: 'Sexta 20:00' }
   ]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      console.log('🚪 Iniciando logout do perfil...');
+      setIsLoggingOut(true);
+      await logout();
+      console.log('✅ Logout concluído, redirecionando...');
+      navigate("/");
+    } catch (error) {
+      console.error('❌ Erro no logout:', error);
+      setIsLoggingOut(false);
+      // Mesmo com erro, redirecionar para a página inicial
+      navigate("/");
+    }
   };
 
   const handleSave = async () => {
@@ -97,26 +127,16 @@ const Profile = () => {
           name: editedName,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id)
-        .select()
-        .single();
-      
-      console.log('📋 Resposta do Supabase:', { data, error });
-      
+        .eq('id', user.id);
+
       if (error) {
         console.error('❌ Erro ao salvar perfil:', error);
-        setIsSaving(false);
         return;
       }
-      
-      console.log('✅ Perfil atualizado com sucesso:', data);
-      
-      // Forçar atualização do contexto
-      console.log('🔄 Atualizando contexto...');
-      await refreshUser();
-      
+
+      console.log('✅ Perfil salvo com sucesso:', data);
       setIsEditing(false);
-      console.log('✅ Edição finalizada');
+      await refreshUser();
     } catch (err) {
       console.error('❌ Erro ao salvar perfil:', err);
     } finally {
@@ -125,16 +145,200 @@ const Profile = () => {
     }
   };
 
-  const addInterest = () => {
-    if (newInterest.trim() && !interests.includes(newInterest.trim())) {
-      setInterests([...interests, newInterest.trim()]);
-      setNewInterest("");
-      setShowAddInterest(false);
+  // Carregar interesses do usuário
+  const loadUserInterests = async () => {
+    if (!user?.id) {
+      console.log('❌ Usuário não autenticado, não é possível carregar interesses');
+      return;
+    }
+    
+    try {
+      setIsLoadingInterests(true);
+      console.log('🔄 Carregando interesses do usuário:', user.id);
+      
+      const { data, error } = await supabase
+        .from('user_interests')
+        .select(`
+          interest_id,
+          interests (
+            id,
+            name
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('❌ Erro ao carregar interesses:', error);
+        return;
+      }
+
+      console.log('📋 Dados brutos dos interesses:', data);
+      
+      const interestNames = data?.map(item => {
+        const interest = item.interests as any;
+        return interest?.name;
+      }).filter(Boolean) || [];
+      
+      setInterests(interestNames);
+      console.log('✅ Interesses carregados com sucesso:', interestNames);
+    } catch (error) {
+      console.error('❌ Erro ao carregar interesses:', error);
+    } finally {
+      setIsLoadingInterests(false);
     }
   };
 
-  const removeInterest = (interestToRemove: string) => {
-    setInterests(interests.filter(interest => interest !== interestToRemove));
+  // Função para abrir o modal de seleção de interesses
+  const openInterestSelector = () => {
+    setTempSelectedInterests([...interests]); // Inicializar com interesses atuais
+    setShowAddInterest(true);
+  };
+
+  // Função para fechar o modal
+  const closeInterestSelector = () => {
+    setShowAddInterest(false);
+    setTempSelectedInterests([]);
+  };
+
+  // Função para alternar seleção de interesse
+  const toggleInterest = (interest: string) => {
+    setTempSelectedInterests(prev => {
+      if (prev.includes(interest)) {
+        return prev.filter(i => i !== interest);
+      } else {
+        return [...prev, interest];
+      }
+    });
+  };
+
+  // Função para salvar interesses selecionados
+  const saveInterests = async () => {
+    if (!user?.id) {
+      console.error('❌ Usuário não autenticado');
+      return;
+    }
+
+    try {
+      setIsLoadingInterests(true);
+      console.log('💾 Salvando interesses no banco...');
+      console.log('📋 Interesses a salvar:', tempSelectedInterests);
+      
+      // Primeiro, remover todos os interesses atuais do usuário
+      const { error: deleteError } = await supabase
+        .from('user_interests')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('❌ Erro ao remover interesses antigos:', deleteError);
+        return;
+      }
+
+      // Para cada interesse selecionado, verificar se existe na tabela interests
+      for (const interestName of tempSelectedInterests) {
+        // Verificar se o interesse já existe
+        let { data: existingInterest, error: checkError } = await supabase
+          .from('interests')
+          .select('id')
+          .eq('name', interestName)
+          .single();
+
+        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('❌ Erro ao verificar interesse:', checkError);
+          continue;
+        }
+
+        let interestId;
+
+        if (!existingInterest) {
+          // Criar novo interesse se não existir
+          const { data: newInterest, error: createError } = await supabase
+            .from('interests')
+            .insert({ name: interestName })
+            .select('id')
+            .single();
+
+          if (createError) {
+            console.error('❌ Erro ao criar interesse:', createError);
+            continue;
+          }
+
+          interestId = newInterest.id;
+        } else {
+          interestId = existingInterest.id;
+        }
+
+        // Adicionar relacionamento usuário-interesse
+        const { error: insertError } = await supabase
+          .from('user_interests')
+          .insert({
+            user_id: user.id,
+            interest_id: interestId
+          });
+
+        if (insertError) {
+          console.error('❌ Erro ao adicionar interesse do usuário:', insertError);
+        }
+      }
+
+      // Atualizar estado local
+      setInterests(tempSelectedInterests);
+      setShowAddInterest(false);
+      setTempSelectedInterests([]);
+      
+      console.log('✅ Interesses salvos com sucesso no banco!');
+      
+    } catch (error) {
+      console.error('❌ Erro ao salvar interesses:', error);
+    } finally {
+      setIsLoadingInterests(false);
+    }
+  };
+
+  const removeInterest = async (interestToRemove: string) => {
+    if (!user?.id) {
+      console.error('❌ Usuário não autenticado');
+      return;
+    }
+
+    try {
+      setIsLoadingInterests(true);
+      console.log('🗑️ Removendo interesse:', interestToRemove);
+      
+      // Buscar o ID do interesse
+      const { data: interestData, error: interestError } = await supabase
+        .from('interests')
+        .select('id')
+        .eq('name', interestToRemove)
+        .single();
+
+      if (interestError) {
+        console.error('❌ Erro ao buscar interesse:', interestError);
+        return;
+      }
+
+      console.log('📋 ID do interesse encontrado:', interestData.id);
+
+      // Remover relacionamento usuário-interesse
+      const { error: removeError } = await supabase
+        .from('user_interests')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('interest_id', interestData.id);
+
+      if (removeError) {
+        console.error('❌ Erro ao remover interesse:', removeError);
+        return;
+      }
+
+      // Atualizar estado local
+      setInterests(interests.filter(interest => interest !== interestToRemove));
+      console.log('✅ Interesse removido com sucesso do banco:', interestToRemove);
+    } catch (error) {
+      console.error('❌ Erro ao remover interesse:', error);
+    } finally {
+      setIsLoadingInterests(false);
+    }
   };
 
   const removeGroup = (groupId: number) => {
@@ -147,6 +351,13 @@ const Profile = () => {
       setEditedName(user.name);
     }
   }, [user?.name]);
+
+  // Carregar interesses quando o usuário estiver disponível
+  useEffect(() => {
+    if (user?.id) {
+      loadUserInterests();
+    }
+  }, [user?.id]);
 
   // Stats
   const stats = {
@@ -191,7 +402,7 @@ const Profile = () => {
           {/* User Info - Layout mais compacto */}
           <div className="flex items-center space-x-3">
           <Avatar className="w-12 h-12 border-2 border-primary-foreground/20">
-            <AvatarImage src={user?.avatar} />
+            <AvatarImage src={user?.avatar_url} />
             <AvatarFallback className="bg-primary-foreground text-primary font-bold text-sm">
               CM
             </AvatarFallback>
@@ -263,9 +474,14 @@ const Profile = () => {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
+            disabled={isLoggingOut}
             className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
           >
-            <LogOut className="w-4 h-4" />
+            {isLoggingOut ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+            ) : (
+              <LogOut className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -306,57 +522,93 @@ const Profile = () => {
           </h3>
           
           <div className="space-y-3">
-            {interests.length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-500 mb-3">Nenhum interesse adicionado ainda</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowAddInterest(true)}
-                  className="w-full"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Interesse
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-2">
-                  {interests.map((interest) => (
-                    <Badge key={interest} variant="accept" className="text-sm font-semibold flex items-center">
-                      {interest}
-                      <button onClick={() => removeInterest(interest)} className="ml-2">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-
-                {showAddInterest ? (
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Novo interesse..."
-                      value={newInterest}
-                      onChange={(e) => setNewInterest(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addInterest()}
-                      className="flex-1"
-                    />
-                    <Button size="sm" onClick={addInterest}>
-                      Adicionar
-                    </Button>
-                  </div>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setShowAddInterest(true)}
-                    className="w-full"
+            {/* Lista de interesses atuais */}
+            {interests.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {interests.map((interest) => (
+                  <div 
+                    key={interest} 
+                    className="relative p-2 bg-accent border border-border rounded-md hover:bg-accent/80 transition-colors"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Interesse
-                  </Button>
-                )}
-              </>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-white pr-6 truncate">
+                        {interest}
+                      </span>
+                      <button 
+                        onClick={() => removeInterest(interest)} 
+                        className="absolute top-1 right-1 p-0.5 rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                        disabled={isLoadingInterests}
+                      >
+                        {isLoadingInterests ? (
+                          <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <X className="w-2.5 h-2.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Botão para adicionar/editar interesses */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={openInterestSelector}
+              className="w-full"
+              disabled={isLoadingInterests}
+            >
+              {isLoadingInterests ? (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
+              {interests.length === 0 ? 'Adicionar Interesses' : 'Editar Interesses'}
+            </Button>
+
+            {/* Modal de seleção de interesses */}
+            {showAddInterest && (
+              <Dialog open={showAddInterest} onOpenChange={setShowAddInterest}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Selecionar Interesses</DialogTitle>
+                    <DialogDescription>
+                      Escolha os interesses que melhor representam você. Você pode selecionar quantos quiser.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
+                    {availableInterests.map((interest) => (
+                      <button
+                        key={interest}
+                        onClick={() => toggleInterest(interest)}
+                        className={`p-2 text-sm rounded-md border transition-colors ${
+                          tempSelectedInterests.includes(interest)
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border hover:bg-accent'
+                        }`}
+                      >
+                        {interest}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <DialogFooter className="flex justify-between">
+                    <Button variant="outline" onClick={closeInterestSelector}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={saveInterests} disabled={isLoadingInterests}>
+                      {isLoadingInterests ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                      ) : (
+                        'Salvar'
+                      )}
+                      Salvar ({tempSelectedInterests.length} selecionados)
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             )}
             
             <p className="text-xs text-gray-500">
@@ -458,217 +710,16 @@ const Profile = () => {
             </div>
             
             <p className="text-xs text-gray-500">
-              Grupos conectam pessoas com interesses similares em um raio próximo. Receba convites automáticos para eventos baseados nos seus interesses!
+              Crie eventos e grupos para conectar com pessoas que compartilham seus interesses
             </p>
           </div>
         </Card>
-
-
-        {/* Settings */}
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3 flex items-center">
-            <Settings className="w-4 h-4 mr-2" />
-            Configurações
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium">Notificações</p>
-                <p className="text-xs text-gray-500">Receber alertas sobre atividades</p>
-              </div>
-              <Switch
-                checked={notifications}
-                onCheckedChange={setNotifications}
-              />
-            </div>
-
-            <Separator />
-
-            <div>
-              <p className="text-sm font-medium mb-2">Privacidade do Perfil</p>
-              <Select value={profileVisibility} onValueChange={(value: "friends" | "network") => setProfileVisibility(value)}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="friends">👥 Amigos</SelectItem>
-                  <SelectItem value="network">🌐 Rede (amigos de amigos)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium mb-2">Check-in Automático</p>
-              <Select value={autoCheckin} onValueChange={(value: "public" | "anonymous") => setAutoCheckin(value)}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">🌍 Público</SelectItem>
-                  <SelectItem value="anonymous">🥸 Anônimo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium mb-2">Permitir mensagens de</p>
-              <Select value={allowMessages} onValueChange={(value: "friends" | "network" | "everyone") => setAllowMessages(value)}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="friends">👥 Meus amigos</SelectItem>
-                  <SelectItem value="network">🌐 Da rede</SelectItem>
-                  <SelectItem value="everyone">🌍 De todos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium mb-2">Postar minha avaliação</p>
-              <Select value={reviewDelay} onValueChange={(value: "immediate" | "1h" | "1d" | "7d") => setReviewDelay(value)}>
-                <SelectTrigger className="h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="immediate">⚡ Imediatamente</SelectItem>
-                  <SelectItem value="1h">⏰ Em 1 hora</SelectItem>
-                  <SelectItem value="1d">📅 Em 1 dia</SelectItem>
-                  <SelectItem value="7d">🗓️ Em 7 dias</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </Card>
-
-
       </div>
 
-
+      {/* Navigation */}
       <MainNavigation />
 
-      {/* Dialogs de detalhamento */}
-      
-      {/* Dialog Check-ins */}
-      <Dialog open={showCheckinsDialog} onOpenChange={setShowCheckinsDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <MapPin className="w-5 h-5 mr-2" />
-              Meus Check-ins ({stats.checkins})
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {checkinsData.map((checkin) => (
-              <div key={checkin.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">{checkin.venue}</h4>
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                    <span>{checkin.date}</span>
-                    <span>•</span>
-                    <span className="flex items-center">
-                      {Array.from({ length: checkin.rating }, (_, i) => (
-                        <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                      ))}
-                    </span>
-                    <span>•</span>
-                    <span className="text-primary font-medium">R$ {checkin.spent}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Avaliações */}
-      <Dialog open={showReviewsDialog} onOpenChange={setShowReviewsDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Star className="w-5 h-5 mr-2" />
-              Minhas Avaliações ({stats.reviews})
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {reviewsData.map((review) => (
-              <div key={review.id} className="p-3 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-sm">{review.venue}</h4>
-                  <span className="text-xs text-muted-foreground">{review.date}</span>
-                </div>
-                <div className="flex items-center space-x-1 mb-2">
-                  {Array.from({ length: review.rating }, (_, i) => (
-                    <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">"{review.comment}"</p>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Amigos */}
-      <Dialog open={showFriendsDialog} onOpenChange={setShowFriendsDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Meus Amigos ({stats.friends})
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {friendsData.map((friend) => (
-              <div key={friend.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={friend.avatar} />
-                  <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">{friend.name}</h4>
-                  <div className="text-xs text-muted-foreground">
-                    <span>{friend.mutualFriends} amigos em comum</span>
-                    <span className="mx-1">•</span>
-                    <span>Último em: {friend.lastSeen}</span>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="text-xs">
-                  Ver perfil
-                </Button>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog Badges */}
-      <Dialog open={showBadgesDialog} onOpenChange={setShowBadgesDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Award className="w-5 h-5 mr-2" />
-              Minhas Conquistas ({stats.badges})
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {badgesData.map((badge) => (
-              <div key={badge.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/30 rounded-xl flex items-center justify-center text-lg">
-                  {badge.icon}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">{badge.name}</h4>
-                  <p className="text-xs text-muted-foreground mb-1">{badge.description}</p>
-                  <span className="text-xs text-primary">Conquistado {badge.earned}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      {/* Dialogs */}
       <CreateGroupDialog 
         isOpen={showCreateGroupDialog} 
         onClose={() => setShowCreateGroupDialog(false)} 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,12 +33,15 @@ import MainNavigation from "@/components/MainNavigation";
 import CreateGroupDialog from "@/components/CreateGroupDialog";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
+  
+
   
   // Debug: log dos dados do usuário
   console.log('🔍 Profile - Dados do usuário:', user);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || "Usuário");
   const [notifications, setNotifications] = useState(user?.preferences?.notifications ?? true);
   const [privacy, setPrivacy] = useState<"public" | "friends" | "community" | "anonymous">(user?.preferences?.privacy || "friends");
@@ -72,9 +76,53 @@ const Profile = () => {
     navigate("/");
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Aqui salvaria as alterações na API/contexto
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      console.log('💾 Salvando alterações do perfil...');
+      console.log('📋 Nome a ser salvo:', editedName);
+      console.log('📋 ID do usuário:', user?.id);
+      
+      if (!user?.id) {
+        console.error('❌ ID do usuário não encontrado');
+        setIsSaving(false);
+        return;
+      }
+      
+      // Salvar no banco de dados
+      console.log('🔄 Enviando requisição para o Supabase...');
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          name: editedName,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+      
+      console.log('📋 Resposta do Supabase:', { data, error });
+      
+      if (error) {
+        console.error('❌ Erro ao salvar perfil:', error);
+        setIsSaving(false);
+        return;
+      }
+      
+      console.log('✅ Perfil atualizado com sucesso:', data);
+      
+      // Forçar atualização do contexto
+      console.log('🔄 Atualizando contexto...');
+      await refreshUser();
+      
+      setIsEditing(false);
+      console.log('✅ Edição finalizada');
+    } catch (err) {
+      console.error('❌ Erro ao salvar perfil:', err);
+    } finally {
+      console.log('🔄 Finalizando save, isLoading = false');
+      setIsSaving(false);
+    }
   };
 
   const addInterest = () => {
@@ -168,14 +216,46 @@ const Profile = () => {
               </Badge>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
-          >
-            <Edit3 className="w-4 h-4" />
-          </Button>
+          <div className="flex space-x-1">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedName(user?.name || "Usuário"); // Reset para o valor original
+                  }}
+                  disabled={isSaving}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                >
+                  {isSaving ? (
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  ) : (
+                    <div className="w-4 h-4 text-primary-foreground">✓</div>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+              >
+                <Edit3 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
         
         <div className="flex justify-end">

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
 import CheckIn from "./pages/CheckIn";
@@ -30,17 +31,61 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/welcome" replace />} />
                 <Route path="/welcome" element={<Welcome />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/checkin" element={<CheckIn />} />
-                <Route path="/social" element={<Social />} />
-                <Route path="/post" element={<Post />} />
-                <Route path="/restaurantes" element={<Restaurantes />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/venue/:id" element={<VenueDetails />} />
-                <Route path="/venue/boteco-da-maria" element={<BotecoDaMariaProfile />} />
-                <Route path="/status" element={<Status />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/messages" element={<Messages />} />
+                <Route path="/home" element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                <Route path="/checkin" element={
+                  <ProtectedRoute>
+                    <CheckIn />
+                  </ProtectedRoute>
+                } />
+                <Route path="/social" element={
+                  <ProtectedRoute>
+                    <Social />
+                  </ProtectedRoute>
+                } />
+                <Route path="/post" element={
+                  <ProtectedRoute>
+                    <Post />
+                  </ProtectedRoute>
+                } />
+                <Route path="/restaurantes" element={
+                  <ProtectedRoute>
+                    <Restaurantes />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/venue/:id" element={
+                  <ProtectedRoute>
+                    <VenueDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/venue/boteco-da-maria" element={
+                  <ProtectedRoute>
+                    <BotecoDaMariaProfile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/status" element={
+                  <ProtectedRoute>
+                    <Status />
+                  </ProtectedRoute>
+                } />
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
+                <Route path="/messages" element={
+                  <ProtectedRoute>
+                    <Messages />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

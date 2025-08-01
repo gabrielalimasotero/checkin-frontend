@@ -1,30 +1,34 @@
 
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  redirectTo?: string;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, isLoading } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  redirectTo = "/welcome" 
+}) => {
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 mx-auto bg-gradient-to-br from-checkin-turquoise-500 to-checkin-petrol-600 rounded-full animate-pulse"></div>
-          <p className="text-gray-600">Carregando...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <>{children}</>;
 };
-
-export default ProtectedRoute;

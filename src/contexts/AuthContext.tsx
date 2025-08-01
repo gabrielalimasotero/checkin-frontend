@@ -51,7 +51,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('🔄 Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('🚪 Usuário fez logout, limpando estados...');
+          setSupabaseUser(null);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
         
         if (session?.user) {
           setSupabaseUser(session.user);
@@ -284,19 +292,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      console.log('🚪 Iniciando logout...');
       setIsLoading(true);
       
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Erro no logout:', error);
+        console.error('❌ Erro no logout:', error);
+        setIsLoading(false);
+        return;
       }
       
+      console.log('✅ Logout realizado com sucesso');
+      
+      // Limpar estados imediatamente
       setSupabaseUser(null);
       setUser(null);
+      
+      // Aguardar um pouco para garantir que o onAuthStateChange seja processado
+      setTimeout(() => {
+        setIsLoading(false);
+        console.log('🔄 Logout finalizado');
+      }, 500);
+      
     } catch (error) {
-      console.error('Erro no logout:', error);
-    } finally {
+      console.error('❌ Erro no logout:', error);
       setIsLoading(false);
     }
   };

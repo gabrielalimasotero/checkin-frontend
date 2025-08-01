@@ -14,6 +14,7 @@ const Welcome = () => {
   const navigate = useNavigate();
   const { user, login, loginWithGoogle, register, isLoading } = useAuth();
   const { toast } = useToast();
+
   const [isVisible, setIsVisible] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -22,6 +23,7 @@ const Welcome = () => {
     email: '',
     password: ''
   });
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     setIsVisible(true);
@@ -37,13 +39,31 @@ const Welcome = () => {
     if (result.success) {
       toast({
         title: "Login realizado!",
-        description: "Bem-vindo ao CheckIn!",
       });
       navigate("/home");
     } else {
+      // Verificar se é um erro de usuário não encontrado
+      const errorMessage = result.error || "";
+      let title = "Erro no login";
+      let description = "Tente novamente.";
+      
+      if (errorMessage.includes("Invalid login credentials")) {
+        title = "Dados inválidos";
+        description = "Email ou senha incorretos. Verifique seus dados.";
+      } else if (errorMessage.includes("Email not confirmed")) {
+        title = "Email não confirmado";
+        description = "Confirme seu email antes de fazer login.";
+      } else if (errorMessage.includes("User not found")) {
+        title = "Usuário não cadastrado";
+        description = "Este email não está cadastrado. Crie uma conta primeiro.";
+      } else if (errorMessage.includes("popup_closed")) {
+        title = "Login cancelado";
+        description = "O login com Google foi cancelado.";
+      }
+      
       toast({
-        title: "Erro no login",
-        description: result.error || "Tente novamente.",
+        title: title,
+        description: description,
         variant: "destructive",
       });
     }
@@ -60,22 +80,57 @@ const Welcome = () => {
     }
 
     const result = await login(formData.email, formData.password);
+    console.log('🔍 Resultado do login:', result);
+    
     if (result.success) {
       toast({
         title: "Login realizado!",
-        description: "Bem-vindo de volta!",
       });
       navigate("/home");
     } else {
+      // Verificar se é um erro de usuário não encontrado
+      const errorMessage = result.error || "";
+      console.log('❌ Erro do login:', errorMessage);
+      
+      let title = "Erro no login";
+      let description = "Email ou senha incorretos.";
+      
+      if (errorMessage.includes("Invalid login credentials")) {
+        // Como o Supabase não diferencia entre usuário não cadastrado e senha incorreta,
+        // vamos usar uma mensagem genérica que funciona para ambos os casos
+        title = "Dados inválidos";
+        description = "Email ou senha incorretos. Verifique seus dados.";
+      } else if (errorMessage.includes("Email not confirmed")) {
+        title = "Email não confirmado";
+        description = "Confirme seu email antes de fazer login.";
+      } else if (errorMessage.includes("User not found")) {
+        title = "Usuário não cadastrado";
+        description = "Este email não está cadastrado. Crie uma conta primeiro.";
+      }
+      
+      console.log('📋 Título final:', title);
+      console.log('📋 Descrição final:', description);
+      
       toast({
-        title: "Erro no login",
-        description: result.error || "Email ou senha incorretos.",
+        title: title,
+        description: description,
         variant: "destructive",
       });
     }
   };
 
+  const validatePassword = (password: string) => {
+    if (password.length > 0 && password.length < 6) {
+      setPasswordError('A senha deve ter pelo menos 6 caracteres');
+    } else {
+      setPasswordError('');
+    }
+  };
+
   const handleRegister = async () => {
+    // Limpar erro anterior
+    setPasswordError('');
+    
     if (!formData.name || !formData.email || !formData.password) {
       toast({
         title: "Campos obrigatórios",
@@ -86,11 +141,7 @@ const Welcome = () => {
     }
 
     if (formData.password.length < 6) {
-      toast({
-        title: "Senha muito curta",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive",
-      });
+      setPasswordError('A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
@@ -102,9 +153,23 @@ const Welcome = () => {
       });
       navigate("/home");
     } else {
+      // Verificar se é um erro de usuário já registrado
+      const errorMessage = result.error || "";
+      let title = "Erro no cadastro";
+      let description = "Tente novamente.";
+      
+      if (errorMessage.includes("already registered") || 
+          errorMessage.includes("User already registered") ||
+          errorMessage.includes("already exists")) {
+        title = "Usuário já cadastrado";
+        description = "Este email já está cadastrado. Tente fazer login.";
+      } else {
+        description = result.error || "Tente novamente.";
+      }
+      
       toast({
-        title: "Erro no cadastro",
-        description: result.error || "Tente novamente.",
+        title: title,
+        description: description,
         variant: "destructive",
       });
     }
@@ -253,11 +318,18 @@ const Welcome = () => {
                   id="password" 
                   type="password" 
                   placeholder="••••••••"
-                  className="mt-1"
+                  className={`mt-1 ${passwordError ? 'border-red-500 focus:border-red-500' : ''}`}
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, password: e.target.value }));
+                    validatePassword(e.target.value);
+                  }}
                 />
-                <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+                {passwordError ? (
+                  <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+                )}
               </div>
 
               <Button 

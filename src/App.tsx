@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Welcome from "./pages/Welcome";
+import AuthCallback from "./pages/AuthCallback";
 import Home from "./pages/Home";
 import CheckIn from "./pages/CheckIn";
 import Social from "./pages/Social";
@@ -31,6 +32,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/welcome" replace />} />
                 <Route path="/welcome" element={<Welcome />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <Home />

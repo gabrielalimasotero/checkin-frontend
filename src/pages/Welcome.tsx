@@ -36,14 +36,17 @@ const Welcome = () => {
 
   const handleGoogleLogin = async () => {
     const result = await loginWithGoogle();
-    if (result.success) {
-      toast({
-        title: "Login realizado!",
-      });
-      navigate("/home");
-    } else {
-      // Verificar se é um erro de usuário não encontrado
+    
+    // Se não for sucesso, verificar se é redirecionamento ou erro
+    if (!result.success) {
       const errorMessage = result.error || "";
+      
+      // Se for redirecionamento, não mostrar toast
+      if (errorMessage.includes("Redirecionando para Google")) {
+        return; // Apenas aguardar o redirecionamento
+      }
+      
+      // Para outros erros, mostrar toast
       let title = "Erro no login";
       let description = "Tente novamente.";
       

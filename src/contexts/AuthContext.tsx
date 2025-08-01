@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setSupabaseUser(session.user);
-          await fetchUserProfile(session.user.id);
+          await fetchUserProfile(session.user.id, session);
         }
       } catch (error) {
         console.error('Erro ao obter sessão inicial:', error);
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (!user) {
             // Buscar perfil existente (não criar novo)
-            await fetchUserProfile(session.user.id);
+            await fetchUserProfile(session.user.id, session);
           }
         } else {
           setSupabaseUser(null);
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Buscar perfil do usuário no banco
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, session?: any) => {
     try {
       console.log('🔍 Buscando perfil do usuário:', userId);
       
@@ -97,10 +97,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('⚠️ Perfil não encontrado, isso é normal para novos usuários:', error.message);
         console.log('💡 Tentando criar perfil automaticamente...');
         
-        // Tentar criar o perfil automaticamente
+        // Tentar criar o perfil automaticamente com dados do Google
+        const googleName = session?.user?.user_metadata?.name || session?.user?.user_metadata?.full_name || 'Usuário';
+        const googleEmail = session?.user?.email || 'user@example.com';
+        
+        console.log('📋 Dados do Google:', { 
+          name: googleName, 
+          email: googleEmail,
+          metadata: session?.user?.user_metadata 
+        });
+        
         const profileCreated = await createUserProfile(userId, { 
-          name: 'Usuário', 
-          email: supabaseUser?.email || 'user@example.com' 
+          name: googleName, 
+          email: googleEmail
         });
         
         if (profileCreated) {
@@ -200,15 +209,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        setIsLoading(false);
         return { success: false, error: error.message };
       }
 
-      return { success: true };
+      // Não retornar success imediatamente - o redirecionamento vai acontecer
+      // O sucesso será tratado no callback
+      return { success: false, error: 'Redirecionando para Google...' };
     } catch (error) {
       console.error('Erro no login com Google:', error);
-      return { success: false, error: 'Erro interno do servidor' };
-    } finally {
       setIsLoading(false);
+      return { success: false, error: 'Erro interno do servidor' };
     }
   };
 

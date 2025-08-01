@@ -3,13 +3,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin, Clock, TrendingUp } from "lucide-react";
+import { Star, MapPin, Clock, TrendingUp, Users, Percent } from "lucide-react";
 
 const ExploreTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const categories = [
     { id: "all", label: "Todos" },
+    { id: "friends", label: "Seus Amigos" },
+    { id: "promotions", label: "Promoções" },
     { id: "restaurant", label: "Restaurantes" },
     { id: "bar", label: "Bares" },
     { id: "show", label: "Shows" },
@@ -27,7 +29,8 @@ const ExploreTab = () => {
       distance: "0.8 km",
       priceRange: "$$",
       trending: true,
-      description: "Autêntica culinária italiana com vista panorâmica"
+      description: "Autêntica culinária italiana com vista panorâmica",
+      filterType: "restaurant"
     },
     {
       id: 2,
@@ -39,7 +42,9 @@ const ExploreTab = () => {
       distance: "1.2 km",
       priceRange: "$",
       trending: true,
-      description: "Música ao vivo e drinks artesanais"
+      description: "Música ao vivo e drinks artesanais",
+      filterType: "bar",
+      friendsHere: ["Ana Silva", "João Santos"]
     },
     {
       id: 3,
@@ -51,9 +56,67 @@ const ExploreTab = () => {
       distance: "2.1 km",
       priceRange: "$$",
       trending: true,
-      description: "Música eletrônica e ambiente underground"
+      description: "Música eletrônica e ambiente underground",
+      filterType: "show"
+    },
+    {
+      id: 4,
+      name: "Café Central",
+      category: "Café",
+      rating: 4.5,
+      reviews: 189,
+      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300&h=200&fit=crop",
+      distance: "0.5 km",
+      priceRange: "$",
+      trending: false,
+      description: "Café artesanal e ambiente para trabalho",
+      filterType: "restaurant",
+      friendsHere: ["Maria Costa", "Pedro Lima"],
+      promotion: "2x1 em cappuccinos até 10h"
+    },
+    {
+      id: 5,
+      name: "Pizzaria Express",
+      category: "Pizzaria",
+      rating: 4.3,
+      reviews: 267,
+      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop",
+      distance: "1.8 km",
+      priceRange: "$$",
+      trending: false,
+      description: "Pizzas tradicionais e delivery rápido",
+      filterType: "restaurant",
+      promotion: "30% off em pedidos acima de R$ 50"
+    },
+    {
+      id: 6,
+      name: "Academia Fitness Pro",
+      category: "Academia",
+      rating: 4.9,
+      reviews: 445,
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop",
+      distance: "0.3 km",
+      priceRange: "$$$",
+      trending: true,
+      description: "Academia completa com personal trainers",
+      filterType: "event",
+      friendsHere: ["Carlos Mendonça", "Juliana Santos"],
+      promotion: "1ª semana grátis para novos alunos"
     }
   ];
+
+  // Filtrar lugares baseado na categoria selecionada
+  const filteredPlaces = selectedCategory === "all" 
+    ? trendingPlaces 
+    : trendingPlaces.filter(place => {
+        if (selectedCategory === "friends") {
+          return place.friendsHere && place.friendsHere.length > 0;
+        }
+        if (selectedCategory === "promotions") {
+          return place.promotion;
+        }
+        return place.filterType === selectedCategory;
+      });
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -80,7 +143,7 @@ const ExploreTab = () => {
           <h2 className="text-lg font-semibold">Em alta agora</h2>
         </div>
 
-        {trendingPlaces.map((place) => (
+        {filteredPlaces.map((place) => (
           <Card key={place.id} className="overflow-hidden hover:shadow-md transition-shadow">
             <div className="relative">
               <img 
@@ -103,9 +166,21 @@ const ExploreTab = () => {
               <div className="space-y-1">
                 <h3 className="font-semibold text-lg">{place.name}</h3>
                 <p className="text-sm text-muted-foreground">{place.description}</p>
-                <Badge variant="secondary" className="text-xs">
-                  {place.category}
-                </Badge>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {place.category}
+                  </Badge>
+                  {place.friendsHere && place.friendsHere.length > 0 && (
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                      👥 {place.friendsHere.length} amigo{place.friendsHere.length !== 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                  {place.promotion && (
+                    <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                      🎉 Promoção
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between text-sm">
@@ -122,14 +197,38 @@ const ExploreTab = () => {
                 </div>
               </div>
 
+              {/* Informações de amigos */}
+              {place.friendsHere && place.friendsHere.length > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                  <p className="text-xs text-green-700 font-medium mb-1">
+                    👥 Seus amigos estão aqui:
+                  </p>
+                  <p className="text-xs text-green-600">
+                    {place.friendsHere.join(", ")}
+                  </p>
+                </div>
+              )}
+
+              {/* Informações de promoção */}
+              {place.promotion && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                  <p className="text-xs text-orange-700 font-medium mb-1">
+                    🎉 Promoção Especial:
+                  </p>
+                  <p className="text-xs text-orange-600">
+                    {place.promotion}
+                  </p>
+                </div>
+              )}
+
               <Button className="w-full" size="sm">
                 Ver detalhes
               </Button>
             </div>
           </Card>
         ))}
-              </div>
       </div>
+    </div>
   );
 };
 

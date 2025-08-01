@@ -7,18 +7,37 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, MapPin, Heart, MessageSquare, Users2, Utensils, Coffee, Music, Star, Target, Calendar, Users, ChevronDown, Filter, Percent, IceCream, ChefHat, Cookie } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
-import SuggestionsDialog from "@/components/SuggestionsDialog";
+
 import MeetNewPeopleDialog from "@/components/MeetNewPeopleDialog";
+import CreateGroupDialog from "@/components/CreateGroupDialog";
+
+// Tipo para pessoa
+interface Person {
+  id: number;
+  name: string;
+  avatar: string;
+  distance: string;
+  venue: string;
+  interests: string[];
+  mutualFriends: number;
+  connectionType: string;
+  compatibility: number;
+  commonInterests: string[];
+  clickable: boolean;
+  gender: "homens" | "mulheres";
+}
 
 const Social = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"lugares" | "grupos" | "pessoas">("lugares");
-  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [showMeetPeople, setShowMeetPeople] = useState(false);
+  const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("Recife");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState("");
+  const [peopleFilter, setPeopleFilter] = useState<"todos" | "homens" | "mulheres">("todos");
 
   // Lista de bares disponíveis
   const availableBars = [
@@ -212,7 +231,7 @@ const Social = () => {
   ];
 
   // Pessoas próximas com filtros de compatibilidade
-  const nearbyPeople = [
+  const nearbyPeople: Person[] = [
     {
       id: 1,
       name: "Ana Silva",
@@ -224,7 +243,8 @@ const Social = () => {
       connectionType: "1º grau",
       compatibility: 92,
       commonInterests: ["Champions League", "Café"],
-      clickable: true
+      clickable: true,
+      gender: "mulheres"
     },
     {
       id: 2,
@@ -237,7 +257,8 @@ const Social = () => {
       connectionType: "2º grau",
       compatibility: 85,
       commonInterests: ["Rock", "Craft Beer"],
-      clickable: false
+      clickable: false,
+      gender: "homens"
     },
     {
       id: 3,
@@ -250,7 +271,36 @@ const Social = () => {
       connectionType: "1º grau",
       compatibility: 88,
       commonInterests: ["Pizza", "Futebol"],
-      clickable: false
+      clickable: false,
+      gender: "mulheres"
+    },
+    {
+      id: 4,
+      name: "Pedro Oliveira",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+      distance: "1.2km",
+      venue: "Café Cultural",
+      interests: ["café", "arte"],
+      mutualFriends: 2,
+      connectionType: "2º grau",
+      compatibility: 78,
+      commonInterests: ["Arte", "Café"],
+      clickable: false,
+      gender: "homens"
+    },
+    {
+      id: 5,
+      name: "Juliana Santos",
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=50&h=50&fit=crop&crop=face",
+      distance: "0.6km",
+      venue: "Bar do João",
+      interests: ["música", "dança"],
+      mutualFriends: 4,
+      connectionType: "1º grau",
+      compatibility: 91,
+      commonInterests: ["Música", "Dança"],
+      clickable: true,
+      gender: "mulheres"
     }
   ];
 
@@ -281,7 +331,7 @@ const Social = () => {
     }
   };
 
-  const handlePersonClick = (person: any) => {
+  const handlePersonClick = (person: Person) => {
     if (person.clickable) {
       navigate(`/profile/${person.id}`);
     }
@@ -313,6 +363,11 @@ const Social = () => {
     setSelectedTag("");
   };
 
+  // Filtrar pessoas baseado no filtro selecionado
+  const filteredPeople = peopleFilter === "todos" 
+    ? nearbyPeople 
+    : nearbyPeople.filter(person => person.gender === peopleFilter);
+
   return (
     <div className="mobile-viewport bg-background flex flex-col">
       {/* Header */}
@@ -335,17 +390,7 @@ const Social = () => {
               </Button>
             </div>
           </div>
-          {filterType === "lugares" && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowSuggestions(true)}
-              className="text-xs border-primary text-primary"
-            >
-              <Target className="w-3 h-3 mr-1" />
-              Personalizar Sugestões
-            </Button>
-          )}
+
         </div>
 
         {/* Search Bar */}
@@ -509,7 +554,7 @@ const Social = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => setShowMeetPeople(true)}
+                onClick={() => setShowCreateGroupDialog(true)}
                 className="text-xs border-primary text-primary"
               >
                 + Criar Grupo
@@ -582,15 +627,35 @@ const Social = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-foreground">Pessoas Próximas</h3>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => setShowMeetPeople(true)}
-                className="text-xs border-primary text-primary"
+            </div>
+            
+            {/* Barra de Filtros */}
+            <div className="flex space-x-2 mb-4">
+              <Button
+                variant={peopleFilter === "todos" ? "default" : "outline"}
+                size="sm"
+                className={`flex-1 text-xs ${peopleFilter === "todos" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}`}
+                onClick={() => setPeopleFilter("todos")}
               >
-                + Conectar
+                Todos
+              </Button>
+              <Button
+                variant={peopleFilter === "homens" ? "default" : "outline"}
+                size="sm"
+                className={`flex-1 text-xs ${peopleFilter === "homens" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}`}
+                onClick={() => setPeopleFilter("homens")}
+              >
+                Homens
+              </Button>
+              <Button
+                variant={peopleFilter === "mulheres" ? "default" : "outline"}
+                size="sm"
+                className={`flex-1 text-xs ${peopleFilter === "mulheres" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}`}
+                onClick={() => setPeopleFilter("mulheres")}
+              >
+                Mulheres
               </Button>
             </div>
             
@@ -600,7 +665,7 @@ const Social = () => {
               </p>
             </div>
 
-            {nearbyPeople.map((person) => (
+            {filteredPeople.map((person) => (
               <Card 
                 key={person.id} 
                 className={`p-3 ${person.clickable ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
@@ -657,14 +722,16 @@ const Social = () => {
         )}
       </div>
 
-      <SuggestionsDialog 
-        isOpen={showSuggestions} 
-        onClose={() => setShowSuggestions(false)} 
-      />
+
 
       <MeetNewPeopleDialog 
         isOpen={showMeetPeople} 
         onClose={() => setShowMeetPeople(false)} 
+      />
+
+      <CreateGroupDialog 
+        isOpen={showCreateGroupDialog} 
+        onClose={() => setShowCreateGroupDialog(false)} 
       />
 
       <MainNavigation />

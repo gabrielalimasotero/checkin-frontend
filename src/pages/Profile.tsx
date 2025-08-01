@@ -29,6 +29,7 @@ import {
   Trash2
 } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
+import CreateGroupDialog from "@/components/CreateGroupDialog";
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -49,6 +50,7 @@ const Profile = () => {
   const [showReviewsDialog, setShowReviewsDialog] = useState(false);
   const [showFriendsDialog, setShowFriendsDialog] = useState(false);
   const [showBadgesDialog, setShowBadgesDialog] = useState(false);
+  const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   
   
   // Interesses do usuário
@@ -356,7 +358,10 @@ const Profile = () => {
                 <Calendar className="w-3 h-3 mr-1" />
                 Evento
               </Button>
-              <Button className="w-full bg-accent hover:bg-accent/90 text-xs">
+              <Button 
+                className="w-full bg-accent hover:bg-accent/90 text-xs"
+                onClick={() => setShowCreateGroupDialog(true)}
+              >
                 <Users className="w-3 h-3 mr-1" />
                 Grupo
               </Button>
@@ -573,6 +578,11 @@ const Profile = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CreateGroupDialog 
+        isOpen={showCreateGroupDialog} 
+        onClose={() => setShowCreateGroupDialog(false)} 
+      />
     </div>
   );
 };

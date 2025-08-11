@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { listVenues } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ const ExploreTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [venues, setVenues] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -137,18 +139,10 @@ const ExploreTab = () => {
     }
   ];
 
-  // Filtrar lugares baseado na categoria selecionada
-  const filteredPlaces = selectedCategory === "all" 
-    ? (venues.length ? venues : trendingPlaces) 
-    : trendingPlaces.filter(place => {
-        if (selectedCategory === "friends") {
-          return place.friendsHere && place.friendsHere.length > 0;
-        }
-        if (selectedCategory === "promotions") {
-          return place.promotion;
-        }
-        return place.filterType === selectedCategory;
-      });
+  // Filtrar lugares baseado na categoria selecionada (somente dados do backend)
+  const filteredPlaces = selectedCategory === "all"
+    ? venues
+    : venues.filter(place => place.filterType === selectedCategory);
 
   return (
     <div className="p-4 pb-20 space-y-4">
@@ -175,6 +169,9 @@ const ExploreTab = () => {
           <h2 className="text-lg font-semibold">Em alta agora</h2>
         </div>
 
+        {filteredPlaces.length === 0 && (
+          <div className="text-sm text-muted-foreground p-4">Nenhum local encontrado.</div>
+        )}
         {filteredPlaces.map((place) => (
           <Card key={place.id} className="overflow-hidden hover:shadow-md transition-shadow">
             <div className="relative">
@@ -253,7 +250,7 @@ const ExploreTab = () => {
                 </div>
               )}
 
-              <Button className="w-full" size="sm">
+              <Button className="w-full" size="sm" onClick={() => navigate(`/venue/${place.id}`)}>
                 Ver detalhes
               </Button>
             </div>

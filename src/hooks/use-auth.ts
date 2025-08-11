@@ -28,24 +28,10 @@ export const useAuthHook = () => {
   const supabaseUser = auth.supabaseUser;
 
   /**
-   * Login com email e senha
-   */
-  const login = async (email: string, password: string) => {
-    return await auth.login(email, password);
-  };
-
-  /**
    * Login com Google
    */
   const loginWithGoogle = async () => {
     return await auth.loginWithGoogle();
-  };
-
-  /**
-   * Registro de novo usuário
-   */
-  const register = async (name: string, email: string, password: string) => {
-    return await auth.register(name, email, password);
   };
 
   /**
@@ -78,9 +64,7 @@ export const useAuthHook = () => {
     supabaseUser,
     
     // Métodos
-    login,
     loginWithGoogle,
-    register,
     logout,
     
     // Utilitários

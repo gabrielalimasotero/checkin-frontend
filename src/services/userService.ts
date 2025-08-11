@@ -1,4 +1,9 @@
-import { supabase, User } from '../lib/supabase';
+import type { User } from '../lib/supabase';
+import {
+  getUser as apiGetUser,
+  updateUser as apiUpdateUser,
+  searchUsers as apiSearchUsers,
+} from '@/lib/api';
 
 export interface UpdateUserProfileData {
   name?: string;
@@ -19,18 +24,7 @@ export class UserService {
    */
   static async getUserProfile(userId: string): Promise<User | null> {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Erro ao buscar perfil do usuário:', error);
-        return null;
-      }
-
-      return data;
+      return await apiGetUser(userId);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
       return null;
@@ -42,16 +36,7 @@ export class UserService {
    */
   static async updateUserProfile(userId: string, data: UpdateUserProfileData): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update(data)
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Erro ao atualizar perfil do usuário:', error);
-        return false;
-      }
-
+      await apiUpdateUser(userId, data);
       return true;
     } catch (error) {
       console.error('Erro ao atualizar perfil do usuário:', error);
@@ -93,18 +78,7 @@ export class UserService {
    */
   static async searchUsers(query: string): Promise<User[]> {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .or(`name.ilike.%${query}%,email.ilike.%${query}%`)
-        .limit(10);
-
-      if (error) {
-        console.error('Erro ao buscar usuários:', error);
-        return [];
-      }
-
-      return data || [];
+      return await apiSearchUsers(query);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       return [];
@@ -116,17 +90,8 @@ export class UserService {
    */
   static async userExists(userId: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        return false;
-      }
-
-      return !!data;
+      const user = await apiGetUser(userId);
+      return !!user?.id;
     } catch (error) {
       return false;
     }
@@ -137,19 +102,7 @@ export class UserService {
    */
   static async deleteUserProfile(userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ 
-          is_connectable: false,
-          profile_visibility: 'public' // Tornar perfil público mas inativo
-        })
-        .eq('id', userId);
-
-      if (error) {
-        console.error('Erro ao deletar perfil do usuário:', error);
-        return false;
-      }
-
+      await apiUpdateUser(userId, { is_connectable: false, profile_visibility: 'public' });
       return true;
     } catch (error) {
       console.error('Erro ao deletar perfil do usuário:', error);

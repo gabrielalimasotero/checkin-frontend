@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { createCheckin } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +16,8 @@ const CheckInDialog = ({ open, onOpenChange }: CheckInDialogProps) => {
   const [postText, setPostText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { supabaseUser, user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -24,11 +28,27 @@ const CheckInDialog = ({ open, onOpenChange }: CheckInDialogProps) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handlePost = () => {
-    console.log("Post:", { text: postText, images: selectedImages, checkInType, location: "Boteco da Maria" });
-    onOpenChange(false);
-    setPostText("");
-    setSelectedImages([]);
+  const handlePost = async () => {
+    if (!user?.id) return;
+    try {
+      setIsSubmitting(true);
+      // TODO: pegar venue_id real do contexto/rota. Usando placeholder por enquanto.
+      const venueId = (window as any).CURRENT_VENUE_ID || '00000000-0000-0000-0000-000000000000';
+      await createCheckin({
+        user_id: user.id,
+        venue_id: venueId,
+        review: postText || null,
+        photos: null,
+        is_anonymous: checkInType !== 'public',
+      });
+      onOpenChange(false);
+      setPostText("");
+      setSelectedImages([]);
+    } catch (e) {
+      console.error('Erro ao publicar check-in:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleCheckInType = () => {
@@ -150,7 +170,7 @@ const CheckInDialog = ({ open, onOpenChange }: CheckInDialogProps) => {
               <Button 
                 onClick={handlePost} 
                 className="w-full h-9 bg-primary hover:bg-primary/90"
-                disabled={isOverLimit}
+                disabled={isOverLimit || isSubmitting}
               >
                 Publicar
               </Button>

@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Bell, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { listNotifications } from "@/lib/api";
 
 const TopHeader = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchValue, setSearchValue] = useState("");
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await listNotifications({ limit: 50 });
+        const count = (data || []).filter((n) => !n.is_read).length;
+        setUnreadCount(count);
+      } catch (e) {
+        // Em caso de erro, não mostrar badge
+        setUnreadCount(0);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <div className="bg-white border-b border-border sticky top-0 z-50">
@@ -47,9 +63,11 @@ const TopHeader = () => {
               onClick={() => navigate('/notifications')}
             >
               <Bell className="w-5 h-5" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full flex items-center justify-center">
-                <span className="text-xs text-white font-bold">3</span>
-              </div>
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-destructive rounded-full flex items-center justify-center">
+                  <span className="text-[10px] leading-none text-white font-bold">{unreadCount}</span>
+                </div>
+              )}
             </Button>
           </div>
         </div>

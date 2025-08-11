@@ -2,13 +2,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, User } from '../lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { backendLogin, backendRegister, clearBackendToken, getBackendToken, backendGetMe } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
   supabaseUser: SupabaseUser | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isLoading: boolean;
@@ -30,6 +29,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Garante que exista usuário no backend e que o token esteja válido
+  const ensureBackendUserAndToken = async (session: any) => {
+    const email = session?.user?.email ?? '';
+    if (!email) return;
+    // Primeiro, tenta registrar (idempotente). Depois, faz login para obter token.
+    try {
+      const googleName = session?.user?.user_metadata?.name || session?.user?.user_metadata?.full_name || 'Usuário';
+      await backendRegister({
+        id: session.user.id,
+        email,
+        name: googleName,
+        is_connectable: true,
+        profile_visibility: 'friends',
+        auto_checkin_visibility: 'public',
+        allow_messages_from: 'friends',
+        review_delay: 'immediate',
+        notifications_enabled: true,
+      });
+    } catch (e) {
+      // Pode falhar se já existir — ignorar
+      console.warn('Registro backend falhou/usuario pode já existir:', e);
+    }
+    try {
+      await backendLogin(email);
+    } catch (e2) {
+      console.warn('Falha ao obter token do backend:', e2);
+    }
+  };
+
   // Verificar sessão atual e configurar listener
   useEffect(() => {
     const getInitialSession = async () => {
@@ -37,6 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setSupabaseUser(session.user);
+          // Garante usuário e token no backend e busca perfil
+          await ensureBackendUserAndToken(session);
           await fetchUserProfile(session.user.id, session);
         }
       } catch (error) {
@@ -64,13 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setSupabaseUser(session.user);
           
-          if (!user) {
-            // Buscar perfil existente (não criar novo)
-            await fetchUserProfile(session.user.id, session);
-          }
+          // Garante usuário e token no backend e busca perfil
+          await ensureBackendUserAndToken(session);
+          await fetchUserProfile(session.user.id, session);
         } else {
           setSupabaseUser(null);
           setUser(null);
+          clearBackendToken();
         }
         console.log('🔄 Finalizando auth state change, isLoading = false');
         setIsLoading(false);
@@ -80,91 +110,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  // Buscar perfil do usuário no banco
-  const fetchUserProfile = async (userId: string, session?: any) => {
+  // Buscar perfil do usuário no backend (fonte de verdade)
+  const fetchUserProfile = async (_userId: string, session?: any) => {
     try {
-      console.log('🔍 Buscando perfil do usuário:', userId);
-      
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      console.log('📋 Resposta da busca:', { data, error });
-
-      if (error) {
-        console.log('⚠️ Perfil não encontrado, isso é normal para novos usuários:', error.message);
-        console.log('💡 Tentando criar perfil automaticamente...');
-        
-        // Tentar criar o perfil automaticamente com dados do Google
-        const googleName = session?.user?.user_metadata?.name || session?.user?.user_metadata?.full_name || 'Usuário';
-        const googleEmail = session?.user?.email || 'user@example.com';
-        
-        console.log('📋 Dados do Google:', { 
-          name: googleName, 
-          email: googleEmail,
-          metadata: session?.user?.user_metadata 
-        });
-        
-        const profileCreated = await createUserProfile(userId, { 
-          name: googleName, 
-          email: googleEmail
-        });
-        
-        if (profileCreated) {
-          console.log('✅ Perfil criado automaticamente');
-          // Buscar novamente
-          const { data: newData, error: newError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', userId)
-            .single();
-          
-          if (newData) {
-            console.log('✅ Perfil encontrado após criação:', newData);
-            setUser(newData);
-          }
-        }
-        return;
-      }
-
-      if (data) {
-        console.log('✅ Perfil encontrado:', data);
-        setUser(data);
-      }
+      console.log('🔍 Buscando perfil no backend');
+      const data = await backendGetMe();
+      console.log('✅ Perfil do backend:', data);
+      setUser(data);
     } catch (error) {
-      console.error('❌ Erro ao buscar perfil do usuário:', error);
+      console.error('❌ Erro ao buscar perfil (backend):', error);
     }
   };
 
-  // Criar perfil do usuário no banco
+  // Criar perfil do usuário no backend
   const createUserProfile = async (userId: string, userData: { name: string; email: string }) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: userId,
-            name: userData.name,
-            email: userData.email,
-            is_connectable: true,
-            profile_visibility: 'friends',
-            auto_checkin_visibility: 'public',
-            allow_messages_from: 'friends',
-            review_delay: 'immediate',
-            notifications_enabled: true,
-          }
-        ]);
-
-      if (error) {
-        console.error('Erro ao criar perfil do usuário:', error);
-        return false;
-      }
-
+      await backendRegister({
+        id: userId,
+        name: userData.name,
+        email: userData.email,
+        is_connectable: true,
+        profile_visibility: 'friends',
+        auto_checkin_visibility: 'public',
+        allow_messages_from: 'friends',
+        review_delay: 'immediate',
+        notifications_enabled: true,
+      });
       return true;
     } catch (error) {
-      console.error('Erro ao criar perfil do usuário:', error);
+      console.error('Erro ao criar perfil do usuário (backend):', error);
       return false;
     }
   };
@@ -184,7 +158,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.user) {
         setSupabaseUser(data.user);
+        // Backend: obter token e perfil
+        try {
+          await backendLogin(email);
+        } catch (e: any) {
+          console.warn('Falha ao realizar login no backend:', e?.message || e);
+        }
         await fetchUserProfile(data.user.id);
+        // Obter e armazenar token do backend
+        try {
+          await backendLogin(email);
+        } catch (e: any) {
+          console.warn('Falha ao realizar login no backend:', e?.message || e);
+        }
         return { success: true };
       }
 
@@ -223,72 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      console.log('🔍 Iniciando registro:', { name, email });
-      console.log('📋 Dados recebidos:', { name, email, password: '***' });
-      setIsLoading(true);
-      
-      console.log('📋 Enviando dados para registro:', { name, email });
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name,
-            email: email,
-          },
-          emailRedirectTo: 'http://localhost:8081/welcome'
-        }
-      });
-
-      console.log('📋 Resposta do Supabase:', { data, error });
-
-      if (error) {
-        console.error('❌ Erro no registro:', error);
-        return { success: false, error: error.message };
-      }
-
-      if (data.user) {
-        console.log('✅ Usuário criado:', data.user.id);
-        
-        // Criar perfil imediatamente com os dados corretos
-        console.log('💾 Criando perfil com dados corretos...');
-        const profileCreated = await createUserProfile(data.user.id, { name, email });
-        
-        if (profileCreated) {
-          console.log('✅ Perfil criado com sucesso');
-          setSupabaseUser(data.user);
-          
-          // Buscar o perfil criado para definir o estado
-          const { data: profileData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-          
-          if (profileData) {
-            console.log('✅ Perfil carregado:', profileData);
-            setUser(profileData);
-          }
-          
-          return { success: true };
-        } else {
-          console.error('❌ Erro ao criar perfil');
-          return { success: false, error: 'Erro ao criar perfil do usuário' };
-        }
-      }
-
-      console.error('❌ Nenhum usuário retornado');
-      return { success: false, error: 'Erro desconhecido no registro' };
-    } catch (error) {
-      console.error('❌ Erro no registro:', error);
-      return { success: false, error: 'Erro interno do servidor' };
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Registro manual removido do contexto; o cadastro ocorrerá através do Google
 
   const refreshUser = async () => {
     try {
@@ -319,6 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Limpar estados imediatamente
       setSupabaseUser(null);
       setUser(null);
+      clearBackendToken();
       
       // Aguardar um pouco para garantir que o onAuthStateChange seja processado
       setTimeout(() => {
@@ -337,9 +259,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{ 
         user, 
         supabaseUser,
-        login, 
         loginWithGoogle, 
-        register, 
         logout, 
         refreshUser,
         isLoading,

@@ -1,15 +1,81 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, MapPin, Clock, Users, Check, X, Heart, Calendar, UserPlus } from 'lucide-react';
+import { listNotifications } from '@/lib/api';
 
 const Notifications = () => {
   const navigate = useNavigate();
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const data = await listNotifications({ limit: 50 });
+        // Mapear para formato da UI atual (temporário)
+        const mapped = data.map((n) => {
+          if (n.type === 'event_reminder') {
+            return {
+              id: n.id,
+              type: 'event_reminder',
+              title: n.title,
+              venue: n.data?.venue || '',
+              date: n.data?.date || '',
+              time: n.data?.time || '',
+              timeAgo: '',
+            };
+          }
+          if (n.type === 'checkin') {
+            return {
+              id: n.id,
+              type: 'checkin',
+              friend: {
+                name: n.data?.friend_name || 'Amigo',
+                avatar: n.data?.friend_avatar || '',
+              },
+              venue: n.data?.venue || '',
+              timeAgo: '',
+            };
+          }
+          if (n.type === 'connection') {
+            return {
+              id: n.id,
+              type: 'connection',
+              person: {
+                name: n.data?.person_name || 'Pessoa',
+                avatar: n.data?.person_avatar || '',
+              },
+              mutualFriends: n.data?.mutualFriends || 0,
+              mutualInterests: n.data?.mutualInterests || [],
+              timeAgo: '',
+            };
+          }
+          // Fallback genérico
+          return {
+            id: n.id,
+            type: 'event_reminder',
+            title: n.title,
+            venue: n.message,
+            date: '',
+            time: '',
+            timeAgo: '',
+          };
+        });
+        setNotifications(mapped);
+      } catch (e) {
+        console.error('Erro ao carregar notificações:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleAcceptConnection = (connectionId: number) => {
     console.log(`Aceitar conexão ${connectionId}`);
@@ -19,99 +85,7 @@ const Notifications = () => {
     console.log(`Recusar conexão ${connectionId}`);
   };
 
-  // Todas as notificações em uma única lista
-  const allNotifications = [
-    {
-      id: 1,
-      type: "event_reminder",
-      title: "Festa de aniversário da Júlia",
-      venue: "Casa da Júlia",
-      date: "Hoje",
-      time: "20:00",
-      timeAgo: "há 1h"
-    },
-    {
-      id: 2,
-      type: "checkin",
-      friend: {
-        name: "Ana Costa",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
-      },
-      venue: "Bar do João",
-      timeAgo: "há 5 min"
-    },
-    {
-      id: 3,
-      type: "connection",
-      person: {
-        name: "Marina Santos",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
-      },
-      type: "friendship",
-      mutualFriends: 3,
-      timeAgo: "há 2h"
-    },
-    {
-      id: 4,
-      type: "checkin",
-      friend: {
-        name: "João Santos",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-      },
-      venue: "Café Central",
-      timeAgo: "há 15 min"
-    },
-    {
-      id: 5,
-      type: "event_reminder",
-      title: "Happy Hour com Pedro",
-      venue: "Bar Esportivo",
-      date: "Amanhã",
-      time: "18:00",
-      timeAgo: "há 3h"
-    },
-    {
-      id: 6,
-      type: "connection",
-      person: {
-        name: "Rafael Costa",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-      },
-      type: "connection",
-      mutualInterests: ["Música", "Esportes"],
-      timeAgo: "há 1h"
-    },
-    {
-      id: 7,
-      type: "checkin",
-      friend: {
-        name: "Maria Silva",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
-      },
-      venue: "Pizzaria Bella Vista",
-      timeAgo: "há 30 min"
-    },
-    {
-      id: 8,
-      type: "connection",
-      person: {
-        name: "Fernanda Lima",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
-      },
-      type: "friendship",
-      mutualFriends: 5,
-      timeAgo: "há 30 min"
-    },
-    {
-      id: 9,
-      type: "event_reminder",
-      title: "Show de Jazz",
-      venue: "Café Blues",
-      date: "Sábado",
-      time: "21:00",
-      timeAgo: "há 1 dia"
-    }
-  ];
+  const allNotifications = notifications;
 
 
 
@@ -257,7 +231,7 @@ const Notifications = () => {
         })}
 
         {/* Estado vazio */}
-        {allNotifications.length === 0 && (
+        {(!isLoading && allNotifications.length === 0) && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-muted-foreground" />

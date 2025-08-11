@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { listInterests, createInterest, getUserInterests, addUserInterest, removeUserInterest } from '@/lib/api';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -119,22 +119,10 @@ const Profile = () => {
         return;
       }
       
-      // Salvar no banco de dados
-      console.log('🔄 Enviando requisição para o Supabase...');
-      const { data, error } = await supabase
-        .from('users')
-        .update({
-          name: editedName,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('❌ Erro ao salvar perfil:', error);
-        return;
-      }
-
-      console.log('✅ Perfil salvo com sucesso:', data);
+      // Salvar no backend
+      const { updateUser } = await import('@/lib/api');
+      await updateUser(user.id, { name: editedName });
+      console.log('✅ Perfil salvo com sucesso no backend');
       setIsEditing(false);
       await refreshUser();
     } catch (err) {
@@ -154,33 +142,11 @@ const Profile = () => {
     
     try {
       setIsLoadingInterests(true);
-      console.log('🔄 Carregando interesses do usuário:', user.id);
-      
-      const { data, error } = await supabase
-        .from('user_interests')
-        .select(`
-          interest_id,
-          interests (
-            id,
-            name
-          )
-        `)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('❌ Erro ao carregar interesses:', error);
-        return;
-      }
-
-      console.log('📋 Dados brutos dos interesses:', data);
-      
-      const interestNames = data?.map(item => {
-        const interest = item.interests as any;
-        return interest?.name;
-      }).filter(Boolean) || [];
-      
+      console.log('🔄 Carregando interesses do usuário (backend):', user.id);
+      const data = await getUserInterests(user.id);
+      const interestNames = (data || []).map(i => i.name).filter(Boolean) as string[];
       setInterests(interestNames);
-      console.log('✅ Interesses carregados com sucesso:', interestNames);
+      console.log('✅ Interesses carregados com sucesso do backend:', interestNames);
     } catch (error) {
       console.error('❌ Erro ao carregar interesses:', error);
     } finally {
@@ -220,74 +186,31 @@ const Profile = () => {
 
     try {
       setIsLoadingInterests(true);
-      console.log('💾 Salvando interesses no banco...');
+      console.log('💾 Salvando interesses no backend...');
       console.log('📋 Interesses a salvar:', tempSelectedInterests);
-      
-      // Primeiro, remover todos os interesses atuais do usuário
-      const { error: deleteError } = await supabase
-        .from('user_interests')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (deleteError) {
-        console.error('❌ Erro ao remover interesses antigos:', deleteError);
-        return;
+      // Buscar catálogo de interesses para mapear nome -> id
+      const catalog = await listInterests();
+      const nameToId = new Map(catalog.map(i => [i.name, i.id] as const));
+      // Primeiro, remover todos os interesses atuais
+      const current = await getUserInterests(user.id);
+      for (const it of current) {
+        await removeUserInterest(user.id, it.id);
       }
-
-      // Para cada interesse selecionado, verificar se existe na tabela interests
+      // Inserir os selecionados (criando no catálogo se necessário)
       for (const interestName of tempSelectedInterests) {
-        // Verificar se o interesse já existe
-        let { data: existingInterest, error: checkError } = await supabase
-          .from('interests')
-          .select('id')
-          .eq('name', interestName)
-          .single();
-
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.error('❌ Erro ao verificar interesse:', checkError);
-          continue;
+        let interestId = nameToId.get(interestName);
+        if (!interestId) {
+          const created = await createInterest(interestName);
+          interestId = created.id;
+          nameToId.set(interestName, interestId);
         }
-
-        let interestId;
-
-        if (!existingInterest) {
-          // Criar novo interesse se não existir
-          const { data: newInterest, error: createError } = await supabase
-            .from('interests')
-            .insert({ name: interestName })
-            .select('id')
-            .single();
-
-          if (createError) {
-            console.error('❌ Erro ao criar interesse:', createError);
-            continue;
-          }
-
-          interestId = newInterest.id;
-        } else {
-          interestId = existingInterest.id;
-        }
-
-        // Adicionar relacionamento usuário-interesse
-        const { error: insertError } = await supabase
-          .from('user_interests')
-          .insert({
-            user_id: user.id,
-            interest_id: interestId
-          });
-
-        if (insertError) {
-          console.error('❌ Erro ao adicionar interesse do usuário:', insertError);
-        }
+        await addUserInterest(user.id, interestId);
       }
 
-      // Atualizar estado local
       setInterests(tempSelectedInterests);
       setShowAddInterest(false);
       setTempSelectedInterests([]);
-      
-      console.log('✅ Interesses salvos com sucesso no banco!');
-      
+      console.log('✅ Interesses salvos com sucesso no backend!');
     } catch (error) {
       console.error('❌ Erro ao salvar interesses:', error);
     } finally {
@@ -303,37 +226,14 @@ const Profile = () => {
 
     try {
       setIsLoadingInterests(true);
-      console.log('🗑️ Removendo interesse:', interestToRemove);
-      
-      // Buscar o ID do interesse
-      const { data: interestData, error: interestError } = await supabase
-        .from('interests')
-        .select('id')
-        .eq('name', interestToRemove)
-        .single();
-
-      if (interestError) {
-        console.error('❌ Erro ao buscar interesse:', interestError);
-        return;
+      console.log('🗑️ Removendo interesse (backend):', interestToRemove);
+      const catalog = await listInterests();
+      const interest = catalog.find(i => i.name === interestToRemove);
+      if (interest?.id) {
+        await removeUserInterest(user.id, interest.id);
+        setInterests(interests.filter(interest => interest !== interestToRemove));
+        console.log('✅ Interesse removido com sucesso do backend:', interestToRemove);
       }
-
-      console.log('📋 ID do interesse encontrado:', interestData.id);
-
-      // Remover relacionamento usuário-interesse
-      const { error: removeError } = await supabase
-        .from('user_interests')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('interest_id', interestData.id);
-
-      if (removeError) {
-        console.error('❌ Erro ao remover interesse:', removeError);
-        return;
-      }
-
-      // Atualizar estado local
-      setInterests(interests.filter(interest => interest !== interestToRemove));
-      console.log('✅ Interesse removido com sucesso do banco:', interestToRemove);
     } catch (error) {
       console.error('❌ Erro ao remover interesse:', error);
     } finally {

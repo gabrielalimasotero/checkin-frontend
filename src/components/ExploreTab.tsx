@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { listVenues } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,37 @@ import { Star, MapPin, Clock, TrendingUp, Users, Percent } from "lucide-react";
 
 const ExploreTab = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [venues, setVenues] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const data = await listVenues({ limit: 12, sort_by: 'rating', sort_order: 'desc' });
+        // Mapear para o formato esperado por esta UI
+        const mapped = data.map((v) => ({
+          id: v.id,
+          name: v.name,
+          category: v.category,
+          rating: v.rating ?? 0,
+          reviews: v.total_reviews ?? 0,
+          image: v.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop',
+          distance: '',
+          priceRange: v.price_range || '$$',
+          trending: false,
+          description: v.description || '',
+          filterType: 'restaurant',
+        }));
+        setVenues(mapped);
+      } catch (e) {
+        console.error('Erro ao carregar venues:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const categories = [
     { id: "all", label: "Todos" },
@@ -107,7 +139,7 @@ const ExploreTab = () => {
 
   // Filtrar lugares baseado na categoria selecionada
   const filteredPlaces = selectedCategory === "all" 
-    ? trendingPlaces 
+    ? (venues.length ? venues : trendingPlaces) 
     : trendingPlaces.filter(place => {
         if (selectedCategory === "friends") {
           return place.friendsHere && place.friendsHere.length > 0;

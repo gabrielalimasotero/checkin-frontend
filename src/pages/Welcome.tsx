@@ -3,8 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -12,18 +10,11 @@ import { Loader2 } from "lucide-react";
 
 const Welcome = () => {
   const navigate = useNavigate();
-  const { user, login, loginWithGoogle, register, isLoading } = useAuth();
+  const { user, loginWithGoogle, isLoading } = useAuth();
   const { toast } = useToast();
 
   const [isVisible, setIsVisible] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
-  const [passwordError, setPasswordError] = useState('');
+  // Removidos fluxos de email/senha e registro manual
 
   useEffect(() => {
     setIsVisible(true);
@@ -72,111 +63,7 @@ const Welcome = () => {
     }
   };
 
-  const handleEmailLogin = async () => {
-    if (!formData.email || !formData.password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha email e senha.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const result = await login(formData.email, formData.password);
-    console.log('🔍 Resultado do login:', result);
-    
-    if (result.success) {
-      toast({
-        title: "Login realizado!",
-      });
-      navigate("/home");
-    } else {
-      // Verificar se é um erro de usuário não encontrado
-      const errorMessage = result.error || "";
-      console.log('❌ Erro do login:', errorMessage);
-      
-      let title = "Erro no login";
-      let description = "Email ou senha incorretos.";
-      
-      if (errorMessage.includes("Invalid login credentials")) {
-        // Como o Supabase não diferencia entre usuário não cadastrado e senha incorreta,
-        // vamos usar uma mensagem genérica que funciona para ambos os casos
-        title = "Dados inválidos";
-        description = "Email ou senha incorretos. Verifique seus dados.";
-      } else if (errorMessage.includes("Email not confirmed")) {
-        title = "Email não confirmado";
-        description = "Confirme seu email antes de fazer login.";
-      } else if (errorMessage.includes("User not found")) {
-        title = "Usuário não cadastrado";
-        description = "Este email não está cadastrado. Crie uma conta primeiro.";
-      }
-      
-      console.log('📋 Título final:', title);
-      console.log('📋 Descrição final:', description);
-      
-      toast({
-        title: title,
-        description: description,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const validatePassword = (password: string) => {
-    if (password.length > 0 && password.length < 6) {
-      setPasswordError('A senha deve ter pelo menos 6 caracteres');
-    } else {
-      setPasswordError('');
-    }
-  };
-
-  const handleRegister = async () => {
-    // Limpar erro anterior
-    setPasswordError('');
-    
-    if (!formData.name || !formData.email || !formData.password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setPasswordError('A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
-    const result = await register(formData.name, formData.email, formData.password);
-    if (result.success) {
-      toast({
-        title: "Conta criada!",
-        description: "Bem-vindo ao CheckIn!",
-      });
-      navigate("/home");
-    } else {
-      // Verificar se é um erro de usuário já registrado
-      const errorMessage = result.error || "";
-      let title = "Erro no cadastro";
-      let description = "Tente novamente.";
-      
-      if (errorMessage.includes("already registered") || 
-          errorMessage.includes("User already registered") ||
-          errorMessage.includes("already exists")) {
-        title = "Usuário já cadastrado";
-        description = "Este email já está cadastrado. Tente fazer login.";
-      } else {
-        description = result.error || "Tente novamente.";
-      }
-      
-      toast({
-        title: title,
-        description: description,
-        variant: "destructive",
-      });
-    }
-  };
+  // Fluxos de email/senha removidos
 
   return (
     <div className="mobile-viewport bg-background flex flex-col">
@@ -194,7 +81,7 @@ const Welcome = () => {
           <p className="text-lg text-gray-600">Sua Vida Social Inteligente</p>
         </div>
 
-        {!showLogin && !showRegister ? (
+        {(
           /* Social Login Buttons */
           <Card className="p-6 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
             <div className="space-y-4">
@@ -216,191 +103,11 @@ const Welcome = () => {
                 )}
                 Continuar com Google
               </Button>
-
-              <div className="relative">
-                <Separator className="my-4" />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-gray-500">
-                  ou
-                </span>
-              </div>
-
-              <Button 
-                onClick={() => setShowLogin(true)}
-                variant="outline" 
-                className="w-full h-12 border-2 border-checkin-turquoise-300 text-checkin-turquoise-700 hover:bg-checkin-turquoise-50"
-              >
-                Entrar com E-mail
-              </Button>
-            </div>
-          </Card>
-        ) : showLogin ? (
-          /* Email Login Form */
-          <Card className="p-6 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="seu@email.com"
-                  className="mt-1"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="password">Senha</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="••••••••"
-                  className="mt-1"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                />
-              </div>
-
-              <Button 
-                onClick={handleEmailLogin}
-                disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-checkin-turquoise-500 to-checkin-petrol-600 hover:from-checkin-turquoise-600 hover:to-checkin-petrol-700 text-white"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Entrando...
-                  </>
-                ) : (
-                  'Entrar'
-                )}
-              </Button>
-
-              <div className="text-center">
-                <Button 
-                  variant="link" 
-                  className="text-checkin-turquoise-600 p-0"
-                  onClick={() => setShowLogin(false)}
-                >
-                  ← Voltar
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ) : (
-          /* Register Form */
-          <Card className="p-6 shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome completo</Label>
-                <Input 
-                  id="name" 
-                  type="text" 
-                  placeholder="Seu nome"
-                  className="mt-1"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="seu@email.com"
-                  className="mt-1"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="password">Senha</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="••••••••"
-                  className={`mt-1 ${passwordError ? 'border-red-500 focus:border-red-500' : ''}`}
-                  value={formData.password}
-                  onChange={(e) => {
-                    setFormData(prev => ({ ...prev, password: e.target.value }));
-                    validatePassword(e.target.value);
-                  }}
-                />
-                {passwordError ? (
-                  <p className="text-xs text-red-500 mt-1">{passwordError}</p>
-                ) : (
-                  <p className="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
-                )}
-              </div>
-
-              <Button 
-                onClick={handleRegister}
-                disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-checkin-turquoise-500 to-checkin-petrol-600 hover:from-checkin-turquoise-600 hover:to-checkin-petrol-700 text-white"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Criando conta...
-                  </>
-                ) : (
-                  'Criar Conta'
-                )}
-              </Button>
-
-              <div className="text-center">
-                <Button 
-                  variant="link" 
-                  className="text-checkin-turquoise-600 p-0"
-                  onClick={() => setShowRegister(false)}
-                >
-                  ← Voltar
-                </Button>
-              </div>
             </div>
           </Card>
         )}
 
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
-            {showLogin ? (
-              <>
-                Não tem conta? <span 
-                  className="text-checkin-turquoise-600 font-medium cursor-pointer"
-                  onClick={() => {
-                    setShowLogin(false);
-                    setShowRegister(true);
-                  }}
-                >
-                  Criar conta
-                </span>
-              </>
-            ) : showRegister ? (
-              <>
-                Já tem conta? <span 
-                  className="text-checkin-turquoise-600 font-medium cursor-pointer"
-                  onClick={() => {
-                    setShowRegister(false);
-                    setShowLogin(true);
-                  }}
-                >
-                  Entrar
-                </span>
-              </>
-            ) : (
-              <>
-                Não tem conta? <span 
-                  className="text-checkin-turquoise-600 font-medium cursor-pointer"
-                  onClick={() => setShowRegister(true)}
-                >
-                  Criar conta
-                </span>
-              </>
-            )}
-          </p>
-        </div>
+        {/* Rodapé simplificado sem links de email/senha */}
         </div>
       </div>
     </div>

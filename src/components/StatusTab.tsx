@@ -1,10 +1,12 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, EyeOff, Receipt, ChefHat, CheckCircle2, Clock, MapPin, ExternalLink, Plus, Star, Eye, CreditCard } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { listVenueCheckins } from "@/lib/api";
 import { 
   COMPONENT_VARIANTS, 
   COMMON_CLASSES, 
@@ -32,45 +34,38 @@ const StatusTab = ({
   onRSVP 
 }: StatusTabProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [venueName, setVenueName] = useState<string>("Local");
+  const [accountBacklog, setAccountBacklog] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Check-in ativo atual
-  const currentCheckin = {
-    id: 1,
-    venue: "Boteco da Maria",
-    time: "Hoje 18:00",
-    status: "Ativo",
-    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=100&h=100&fit=crop",
-    totalPaid: 0,
-    rating: 0
-  };
+  useEffect(() => {
+    const load = async () => {
+      const vid = searchParams.get('venueId');
+      if (!vid) return;
+      try {
+        setIsLoading(true);
+        const checkins = await listVenueCheckins(vid, { limit: 10 });
+        // Placeholder: derivar nome do local e backlog conforme o modelo evoluir
+        setVenueName('Local');
+        setAccountBacklog((checkins || []).map((c: any, idx: number) => ({
+          id: idx + 1,
+          item: c.review ? c.review.substring(0, 20) : 'Consumo',
+          quantity: 1,
+          price: 0,
+          status: 'delivered',
+          time: '',
+        })));
+      } catch (e) {
+        setAccountBacklog([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, [searchParams]);
 
-  // Backlog da conta atual
-  const accountBacklog = [
-    {
-      id: 1,
-      item: "Chopp Brahma 300ml",
-      quantity: 2,
-      price: 17.00,
-      status: "delivered",
-      time: "há 5 min"
-    },
-    {
-      id: 2,
-      item: "Porção de Calabresa",
-      quantity: 1,
-      price: 28.00,
-      status: "preparing",
-      time: "há 8 min"
-    },
-    {
-      id: 3,
-      item: "Batata Frita",
-      quantity: 1,
-      price: 18.00,
-      status: "preparing",
-      time: "há 10 min"
-    }
-  ];
+  // Backlog da conta atual (alimentado via API)
 
   // Separar pessoas por status
   const peopleCurrentlyHere = peopleHere.filter(person => !person.isRSVP);
@@ -138,7 +133,7 @@ const StatusTab = ({
       {/* Você está em */}
       <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
         <div>
-          <h3 className="text-base font-semibold text-primary">Você está em {currentCheckin.venue}.</h3>
+          <h3 className="text-base font-semibold text-primary">Você está em {venueName}.</h3>
         </div>
       </Card>
 
@@ -150,7 +145,7 @@ const StatusTab = ({
             Minha Conta
           </h3>
           <Badge variant="secondary" className="text-xs">
-            {accountBacklog.length} itens
+             {accountBacklog.length} itens
           </Badge>
         </div>
         

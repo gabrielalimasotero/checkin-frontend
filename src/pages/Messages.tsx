@@ -1,106 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, MessageSquare, Users, MapPin, Calendar, Clock, UserPlus } from 'lucide-react';
+import { listMessageThreads } from '@/lib/api';
 
 const Messages = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"direct" | "groups">("direct");
+  const [threads, setThreads] = useState<any[]>([]);
+  const [groupThreads, setGroupThreads] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await listMessageThreads();
+        // Mapear para UI; por ora, trata todos como diretos
+        const mapped = (data || []).map((t) => ({
+          id: t.last_message?.id || t.user_id,
+          name: t.user_id,
+          avatar: '',
+          lastMessage: t.last_message?.content || '',
+          time: '',
+          unread: t.unread_count || 0,
+          type: 'direct',
+        }));
+        setThreads(mapped);
+        setGroupThreads([]);
+      } catch (e) {
+        console.error('Erro ao carregar threads:', e);
+      }
+    };
+    load();
+  }, []);
 
   // Mensagens diretas
-  const directMessages = [
-    {
-      id: 1,
-      name: "Ana Silva",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Vamos pro Boteco da Maria hoje às 19h? 🍻",
-      time: "há 5 min",
-      unread: 2,
-      type: "hangout",
-      place: "Boteco da Maria"
-    },
-    {
-      id: 2,
-      name: "Carlos Oliveira",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Confirmado para o happy hour! Que horas chegam?",
-      time: "há 12 min",
-      unread: 0,
-      type: "hangout",
-      place: "Bar do Centro"
-    },
-    {
-      id: 3,
-      name: "Mariana Costa",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Criou o grupo 'Jantares Italianos' - Que tal nos encontrarmos?",
-      time: "há 1h",
-      unread: 1,
-      type: "group",
-      place: "Bella Vista"
-    },
-    {
-      id: 4,
-      name: "Pedro Santos",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      lastMessage: "Galera do futebol está marcando para sábado!",
-      time: "há 2h",
-      unread: 0,
-      type: "hangout",
-      place: "Arena Sports"
-    }
-  ];
-
-  // Mensagens de grupos
-  const groupMessages = [
-    {
-      id: 1,
-      name: "Amigos do Happy Hour",
-      avatar: "🍻",
-      lastMessage: "Ana: Encontro hoje às 18h30 no Bar Central!",
-      time: "há 8 min",
-      unread: 3,
-      members: 8,
-      type: "group",
-      place: "Bar Central"
-    },
-    {
-      id: 2,
-      name: "Foodlovers SP",
-      avatar: "🍕",
-      lastMessage: "Carlos: Alguém conhece um bom japonês na região?",
-      time: "há 25 min",
-      unread: 0,
-      members: 24,
-      type: "group"
-    },
-    {
-      id: 3,
-      name: "Noite e Dia",
-      avatar: "🌙",
-      lastMessage: "Marina: Festival de música eletrônica no sábado!",
-      time: "há 1h",
-      unread: 5,
-      members: 15,
-      type: "group",
-      place: "Club Underground"
-    },
-    {
-      id: 4,
-      name: "Galera do Esporte",
-      avatar: "⚽",
-      lastMessage: "Pedro: Partida marcada para domingo de manhã",
-      time: "há 3h",
-      unread: 0,
-      members: 12,
-      type: "group",
-      place: "Quadra do Parque"
-    }
-  ];
-
-  const currentMessages = activeTab === "direct" ? directMessages : groupMessages;
+  const currentMessages = activeTab === "direct" ? threads : groupThreads;
 
   const handleMessageClick = (messageId: number) => {
     console.log(`Abrir conversa ${messageId}`);

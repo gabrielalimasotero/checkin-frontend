@@ -18,6 +18,7 @@ import Status from "./pages/Status";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
+import MainNavigation from "@/components/MainNavigation";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ function App() {
                 } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <MainNavigation />
             </div>
           </div>
           <Toaster />

@@ -127,6 +127,10 @@ export async function searchUsers(search: string): Promise<DbUser[]> {
   return apiFetch<DbUser[]>(`/users?${params.toString()}`, { attachAuth: true });
 }
 
+export async function listUserFriends(userId: string): Promise<DbUser[]> {
+  return apiFetch<DbUser[]>(`/users/${userId}/friends`, { attachAuth: true });
+}
+
 // Interests
 export interface Interest {
   id: string;
@@ -221,6 +225,29 @@ export async function listVenuePromotions(venueId: string): Promise<Promotion[]>
   return apiFetch<Promotion[]>(`/venues/${venueId}/promotions`, { attachAuth: true });
 }
 
+// Events
+export interface EventItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  venue_id?: string | null;
+  group_id?: string | null;
+  start_time: string;
+  end_time?: string | null;
+  max_attendees?: number | null;
+  is_public: boolean;
+}
+
+export async function listEvents(params?: { skip?: number; limit?: number; group_id?: string; venue_id?: string }): Promise<EventItem[]> {
+  const usp = new URLSearchParams();
+  if (params?.skip != null) usp.set('skip', String(params.skip));
+  if (params?.limit != null) usp.set('limit', String(params.limit));
+  if (params?.group_id) usp.set('group_id', params.group_id);
+  if (params?.venue_id) usp.set('venue_id', params.venue_id);
+  const qs = usp.toString();
+  return apiFetch<EventItem[]>(`/events${qs ? `?${qs}` : ''}`, { attachAuth: true });
+}
+
 // Notifications
 export interface Notification {
   id: string;
@@ -257,6 +284,120 @@ export async function createCheckin(payload: CheckinCreate) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    attachAuth: true,
+  });
+}
+
+export interface Checkin {
+  id: string;
+  user_id: string;
+  venue_id: string;
+  rating?: number | null;
+  review?: string | null;
+  amount_spent?: number | null;
+  photos?: string[] | null;
+  is_anonymous?: boolean;
+  created_at?: string;
+}
+
+export async function listUserCheckins(userId: string, params?: { skip?: number; limit?: number }): Promise<Checkin[]> {
+  const usp = new URLSearchParams();
+  if (params?.skip != null) usp.set('skip', String(params.skip));
+  if (params?.limit != null) usp.set('limit', String(params.limit));
+  const qs = usp.toString();
+  return apiFetch<Checkin[]>(`/users/${userId}/checkins${qs ? `?${qs}` : ''}`, { attachAuth: true });
+}
+
+export async function listVenueCheckins(venueId: string, params?: { skip?: number; limit?: number }): Promise<Checkin[]> {
+  const usp = new URLSearchParams();
+  if (params?.skip != null) usp.set('skip', String(params.skip));
+  if (params?.limit != null) usp.set('limit', String(params.limit));
+  const qs = usp.toString();
+  return apiFetch<Checkin[]>(`/venues/${venueId}/checkins${qs ? `?${qs}` : ''}`, { attachAuth: true });
+}
+
+// Friendships
+export interface Friendship {
+  id: string;
+  user_id: string;
+  friend_id: string;
+  status: 'pending' | 'accepted' | 'blocked';
+}
+
+export async function listIncomingFriendRequests(): Promise<Friendship[]> {
+  return apiFetch<Friendship[]>(`/friendships/requests/incoming`, { attachAuth: true });
+}
+
+export async function listOutgoingFriendRequests(): Promise<Friendship[]> {
+  return apiFetch<Friendship[]>(`/friendships/requests/outgoing`, { attachAuth: true });
+}
+
+// Groups
+export interface GroupItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  avatar_url?: string | null;
+  radius_km?: number | null;
+  is_public: boolean;
+  max_members?: number | null;
+  created_by?: string | null;
+}
+
+export async function listGroups(params?: { skip?: number; limit?: number; search?: string }): Promise<GroupItem[]> {
+  const usp = new URLSearchParams();
+  if (params?.skip != null) usp.set('skip', String(params.skip));
+  if (params?.limit != null) usp.set('limit', String(params.limit));
+  if (params?.search) usp.set('search', params.search);
+  const qs = usp.toString();
+  return apiFetch<GroupItem[]>(`/groups${qs ? `?${qs}` : ''}`, { attachAuth: true });
+}
+
+export interface GroupMemberItem {
+  id: string;
+  group_id: string;
+  user_id: string;
+  role: string;
+  joined_at?: string | null;
+}
+
+export async function listGroupMembers(groupId: string): Promise<GroupMemberItem[]> {
+  return apiFetch<GroupMemberItem[]>(`/groups/${groupId}/members`, { attachAuth: true });
+}
+
+// Messages
+export interface MessageItem {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  is_read: boolean;
+  created_at?: string | null;
+}
+
+export interface MessageThreadItem {
+  user_id: string;
+  last_message: MessageItem;
+  unread_count: number;
+}
+
+export async function listMessageThreads(): Promise<MessageThreadItem[]> {
+  return apiFetch<MessageThreadItem[]>(`/messages/threads`, { attachAuth: true });
+}
+
+export async function listMessagesWith(userId: string, params?: { skip?: number; limit?: number }): Promise<MessageItem[]> {
+  const usp = new URLSearchParams();
+  if (params?.skip != null) usp.set('skip', String(params.skip));
+  if (params?.limit != null) usp.set('limit', String(params.limit));
+  const qs = usp.toString();
+  return apiFetch<MessageItem[]>(`/messages/with/${userId}${qs ? `?${qs}` : ''}`, { attachAuth: true });
+}
+
+export async function createMessage(toUserId: string, content: string): Promise<MessageItem> {
+  return apiFetch<MessageItem>(`/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ receiver_id: toUserId, content }),
     attachAuth: true,
   });
 }

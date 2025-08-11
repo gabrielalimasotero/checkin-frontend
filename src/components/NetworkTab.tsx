@@ -1,128 +1,85 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, MessageSquare, MapPin, Star, Verified, MoreHorizontal, Trash2, Calendar, Users } from "lucide-react";
+import { listUserFriends, listUserCheckins, getUser, listIncomingFriendRequests } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NetworkTab = () => {
+  const { user: currentUser } = useAuth();
   const [statusText, setStatusText] = useState("");
   const [deletedPosts, setDeletedPosts] = useState<number[]>([]);
   const [showInvitations, setShowInvitations] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedPosts, setFeedPosts] = useState<any[]>([]);
+  const [receivedInvitations, setReceivedInvitations] = useState<any[]>([]);
 
-  // Dados de convites (aceitos e pendentes)
-  const receivedInvitations = [
-    {
-      id: 1,
-      type: "event",
-      title: "Happy Hour Sexta-feira",
-      organizer: {
-        name: "João Silva",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-      },
-      venue: "Bar do Zé",
-      date: "Sexta, 20:00",
-      attendees: 8,
-      description: "Vamos celebrar o fim de semana!",
-      time: "há 2 horas",
-      status: "pending"
-    },
-    {
-      id: 2,
-      type: "dinner",
-      title: "Jantar de Aniversário",
-      organizer: {
-        name: "Maria Santos",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-      },
-      venue: "Restaurante Italiano",
-      date: "Sábado, 19:30",
-      attendees: 12,
-      description: "Celebrando 25 anos!",
-      time: "há 1 dia",
-      status: "accepted"
-    },
-    {
-      id: 3,
-      type: "activity",
-      title: "Passeio no Parque",
-      organizer: {
-        name: "Pedro Costa",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-      },
-      venue: "Parque Ibirapuera",
-      date: "Domingo, 15:00",
-      attendees: 5,
-      description: "Caminhada e piquenique",
-      time: "há 3 dias",
-      status: "pending"
-    },
-    {
-      id: 4,
-      type: "event",
-      title: "Show de Rock",
-      organizer: {
-        name: "Ana Costa",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-      },
-      venue: "Casa de Shows",
-      date: "Próximo Sábado, 22:00",
-      attendees: 15,
-      description: "Banda local tocando!",
-      time: "há 5 dias",
-      status: "accepted"
-    }
-  ];
+  useEffect(() => {
+    const load = async () => {
+      if (!currentUser?.id) return;
+      try {
+        setIsLoading(true);
+        // Carregar amigos
+        const friends = await listUserFriends(currentUser.id).catch(() => []);
+        const friendIds = friends.map((f: any) => f.id);
+        const ids = [currentUser.id, ...friendIds];
+        // Carregar checkins recentes para cada usuário
+        const checkinsArrays = await Promise.all(ids.map((uid) => listUserCheckins(uid, { limit: 5 }))); 
+        const all = checkinsArrays.flat();
+        // Carregar dados dos usuários vinculados aos checkins
+        const uniqueUserIds = Array.from(new Set(all.map((c: any) => c.user_id)));
+        const users = await Promise.all(uniqueUserIds.map((uid) => getUser(uid).catch(() => null)));
+        const userMap = new Map(users.filter(Boolean).map((u: any) => [u.id, u]));
+        // Mapear para posts do feed
+        const posts = all
+          .sort((a: any, b: any) => (new Date(b.created_at || '').getTime()) - (new Date(a.created_at || '').getTime()))
+          .map((c: any) => {
+            const u = userMap.get(c.user_id);
+            return {
+              id: c.id,
+              type: 'checkin',
+              user: {
+                name: u?.name || 'Usuário',
+                avatar: u?.avatar_url || '',
+                verified: false,
+              },
+              time: '',
+              content: c.review || '',
+              likes: 0,
+              comments: 0,
+              location: '',
+              rating: c.rating || 0,
+            };
+          });
+        setFeedPosts(posts);
+        // Carregar convites (usar solicitações de amizade como placeholder de convites)
+        const requests = await listIncomingFriendRequests().catch(() => []);
+        const mappedInvites = (requests || []).map((r: any) => ({
+          id: r.id,
+          type: 'friendship',
+          title: 'Novo pedido de amizade',
+          organizer: { name: 'Usuário', avatar: '' },
+          venue: '',
+          date: '',
+          attendees: 0,
+          description: 'Você tem um novo pedido de amizade',
+          time: '',
+          status: 'pending',
+        }));
+        setReceivedInvitations(mappedInvites);
+      } catch (e) {
+        console.error('Erro ao carregar feed:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, [currentUser?.id]);
 
-  const networkPosts = [
-    {
-      id: 1,
-      type: "status",
-      user: {
-        name: "Ana Silva",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-        verified: true,
-      },
-      time: "há 5 min",
-      content: "Alguem tem recomendacao de rodizio de sushi na zn?",
-      likes: 12,
-      comments: 3,
-      location: "São Paulo"
-    },
-    {
-      id: 2,
-      type: "checkin",
-      user: {
-        name: "Carlos Santos",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-        verified: false,
-      },
-      time: "há 15 min",
-      content: "Primeira vez no Sushi Zen e já virou meu favorito! 🍣",
-      likes: 8,
-      comments: 5,
-      location: "Sushi Zen",
-      rating: 5
-    },
-    {
-      id: 3,
-      type: "review",
-      user: {
-        name: "Maria Costa",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-        verified: true,
-      },
-      time: "há 1 hora",
-      content: "Pizza margherita perfeita! Massa fina e ingredientes frescos 🍕",
-      likes: 15,
-      comments: 4,
-      location: "Pizzaria Roma",
-      rating: 4
-    }
-  ];
-
-  const filteredPosts = networkPosts.filter(post => !deletedPosts.includes(post.id));
+  const filteredPosts = useMemo(() => feedPosts.filter((post) => !deletedPosts.includes(post.id)), [feedPosts, deletedPosts]);
 
   const handleUpdateStatus = () => {
     if (statusText.trim()) {

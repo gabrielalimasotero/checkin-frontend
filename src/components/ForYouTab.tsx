@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Clock, Users, MapPin, Star, Calendar, Heart, ArrowLeft, UserPlus, UserCheck, Users2, User } from "lucide-react";
+import { listVenues, listEvents, listUserFriends, listGroups } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   COMPONENT_VARIANTS, 
   COMMON_CLASSES, 
@@ -26,83 +28,60 @@ const ForYouTab = () => {
     { id: "groups", label: "Grupos", description: "Selecionar grupo ou conhecer grupos" },
   ];
 
-  // Dados de amigos
-  const friends = [
-    { id: 1, name: "Ana Costa", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face", status: "online" },
-    { id: 2, name: "João Santos", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face", status: "online" },
-    { id: 3, name: "Maria Silva", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face", status: "offline" },
-    { id: 4, name: "Pedro Lima", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face", status: "online" },
-  ];
+  const { user: currentUser } = useAuth();
+  const [friends, setFriends] = useState<any[]>([]);
 
-  // Dados de grupos
-  const groups = [
-    { id: 1, name: "Amigos do Trabalho", avatar: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=40&h=40&fit=crop", members: 12, status: "active" },
-    { id: 2, name: "Turma da Faculdade", avatar: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=40&h=40&fit=crop", members: 25, status: "active" },
-    { id: 3, name: "Família", avatar: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=40&h=40&fit=crop", members: 8, status: "active" },
-  ];
+  const [groups, setGroups] = useState<any[]>([]);
 
-  const suggestions = [
-    {
-      id: 1,
-      type: "restaurant",
-      name: "Bistrô do Chef",
-      category: "Francesa",
-      description: "Perfeito para um jantar romântico hoje à noite",
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&h=200&fit=crop",
-      rating: 4.8,
-      distance: "1.2 km",
-      timeSlot: "19:00 - 21:00",
-      price: "$$",
-      matchReason: "Baseado no seu gosto por culinária francesa",
-      availability: true,
-      mood: ["date", "friends"]
-    },
-    {
-      id: 2,
-      type: "event",
-      name: "Show Acústico - João Martins",
-      venue: "Café Cultural",
-      description: "Música brasileira ao vivo em ambiente intimista",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop",
-      rating: 4.6,
-      distance: "0.8 km",
-      timeSlot: "20:00",
-      price: "R$ 25",
-      matchReason: "Você gosta de música acústica",
-      attendees: 45,
-      mood: ["solo", "date"]
-    },
-    {
-      id: 3,
-      type: "bar",
-      name: "Rooftop Sunset",
-      category: "Bar",
-      description: "Happy hour com vista da cidade até 19h",
-      image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=300&h=200&fit=crop",
-      rating: 4.7,
-      distance: "2.1 km",
-      timeSlot: "17:00 - 19:00",
-      price: "$",
-      matchReason: "Trending na sua região",
-      specialOffer: "2x1 em drinks até 18h",
-      mood: ["friends", "date"]
-    },
-    {
-      id: 4,
-      type: "activity",
-      name: "Parque Villa-Lobos",
-      category: "Atividade ao ar livre",
-      description: "Tarde perfeita para exercícios e relaxamento",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop",
-      rating: 4.5,
-      distance: "3.2 km",
-      timeSlot: "Agora aberto",
-      price: "Grátis",
-      matchReason: "Você adora atividades ao ar livre",
-      weather: "Clima ideal: 24°C, ensolarado",
-      mood: ["solo", "family", "friends"]
-    }
-  ];
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Carregar alguns venues e eventos para sugerir
+        const [venues, events, myFriends, allGroups] = await Promise.all([
+          listVenues({ limit: 5, sort_by: 'rating', sort_order: 'desc' }),
+          listEvents({ limit: 5 }),
+          currentUser?.id ? listUserFriends(currentUser.id) : Promise.resolve([]),
+          listGroups({ limit: 10 }),
+        ]);
+        setFriends(myFriends || []);
+        setGroups(allGroups || []);
+        const venueCards = (venues || []).map((v) => ({
+          id: v.id,
+          type: 'restaurant',
+          name: v.name,
+          category: v.category,
+          description: v.description || '',
+          image: v.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop',
+          rating: v.rating ?? 0,
+          distance: '',
+          timeSlot: '',
+          price: v.price_range || '$$',
+          matchReason: 'Sugerido para você',
+        }));
+        const eventCards = (events || []).map((e) => ({
+          id: e.id,
+          type: 'event',
+          name: e.title,
+          venue: '',
+          description: e.description || '',
+          image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop',
+          rating: 0,
+          distance: '',
+          timeSlot: e.start_time,
+          price: '',
+          matchReason: 'Evento recomendado',
+          attendees: 0,
+        }));
+        setSuggestions([...venueCards, ...eventCards]);
+      } catch (e) {
+        console.error('Erro ao carregar sugestões:', e);
+        setSuggestions([]);
+      }
+    };
+    load();
+  }, [currentUser?.id]);
 
 
 

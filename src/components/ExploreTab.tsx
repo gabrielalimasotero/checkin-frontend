@@ -44,7 +44,6 @@ const ExploreTab = () => {
 
   const categories = [
     { id: "all", label: "Todos" },
-    { id: "friends", label: "Seus Amigos" },
     { id: "promotions", label: "Promoções" },
     { id: "restaurant", label: "Restaurantes" },
     { id: "bar", label: "Bares" },
@@ -63,13 +62,17 @@ const ExploreTab = () => {
     <div className="p-4 pb-20 space-y-4">
 
       {/* Category Filter */}
-      <div className="flex space-x-2 overflow-x-auto pb-2">
+      <div className="flex space-x-3 overflow-x-auto pb-3 px-1 scrollbar-hide scroll-smooth">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
             size="sm"
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap min-w-fit px-4 py-2 rounded-full transition-all duration-200 ${
+              selectedCategory === category.id 
+                ? "bg-primary text-primary-foreground shadow-md scale-105" 
+                : "bg-background border-border hover:border-primary/50 hover:bg-primary/5"
+            }`}
             onClick={() => setSelectedCategory(category.id)}
           >
             {category.label}

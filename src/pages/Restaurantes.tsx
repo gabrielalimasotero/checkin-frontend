@@ -1,6 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { listVenues } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +13,59 @@ import styles from "@/styles/restarantes.module.css";
 const Restaurantes = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Carregar contagens reais da API
+  useEffect(() => {
+    const loadCategoryCounts = async () => {
+      try {
+        setIsLoading(true);
+        // Carregar todos os venues para contar por categoria
+        const venues = await listVenues({ limit: 1000 }); // Pegar todos
+        
+        // Contar por categoria
+        const counts: Record<string, number> = {};
+        
+        venues.forEach((venue: any) => {
+          const category = venue.category?.toLowerCase() || 'outros';
+          counts[category] = (counts[category] || 0) + 1;
+        });
+        
+        // Mapear para as categorias do frontend
+        const mappedCounts = {
+          'melhor_avaliado': venues.filter((v: any) => (v.rating || 0) >= 4.5).length,
+          'brasileira': counts['brasileiro'] || counts['brasileira'] || 0,
+          'saudavel': counts['saudável'] || counts['saudavel'] || counts['natural'] || 0,
+          'hamburguer': counts['hamburguer'] || counts['hamburgueria'] || counts['burger'] || 0,
+          'pizza': counts['pizza'] || counts['pizzaria'] || 0,
+          'italiana': counts['italiano'] || counts['italiana'] || 0,
+          'japonesa': counts['japonês'] || counts['japonesa'] || counts['sushi'] || 0,
+          'chinesa': counts['chinês'] || counts['chinesa'] || 0,
+          'frutos_mar': counts['frutos do mar'] || counts['peixe'] || counts['seafood'] || 0,
+          'fast_food': counts['fast food'] || counts['fastfood'] || counts['lanchonete'] || 0,
+        };
+        
+        setCategoryCounts(mappedCounts);
+      } catch (error) {
+        console.error('Erro ao carregar contagens:', error);
+        // Em caso de erro, manter contadores zerados
+        setCategoryCounts({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCategoryCounts();
+  }, []);
 
   // Tipos de culinária e categorias de restaurantes
   const cuisineTypes = [
     {
       id: 1,
       name: "Melhores Avaliados",
-      count: 156,
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=150&fit=crop",
+      count: categoryCounts.melhor_avaliado || 0,
+      key: "melhor_avaliado",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Top restaurantes da cidade",
       icon: Award
@@ -27,8 +73,8 @@ const Restaurantes = () => {
     {
       id: 2,
       name: "Brasileira",
-      count: 89,
-      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&h=150&fit=crop",
+      count: categoryCounts.brasileira || 0,
+      key: "brasileira",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Sabores tradicionais do Brasil",
       icon: Heart
@@ -36,8 +82,8 @@ const Restaurantes = () => {
     {
       id: 3,
       name: "Saudável",
-      count: 67,
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=150&fit=crop",
+      count: categoryCounts.saudavel || 0,
+      key: "saudavel",
       gradient: "from-checkin-primary-200 to-checkin-primary-400",
       description: "Opções naturais e nutritivas",
       icon: Salad
@@ -45,8 +91,8 @@ const Restaurantes = () => {
     {
       id: 4,
       name: "Hamburguerias",
-      count: 123,
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=150&fit=crop",
+      count: categoryCounts.hamburguer || 0,
+      key: "hamburguer",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Os melhores burgers da cidade",
       icon: Utensils
@@ -54,8 +100,8 @@ const Restaurantes = () => {
     {
       id: 5,
       name: "Pizzarias",
-      count: 156,
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
+      count: categoryCounts.pizza || 0,
+      key: "pizza",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Pizzas artesanais e tradicionais",
       icon: Utensils
@@ -63,8 +109,8 @@ const Restaurantes = () => {
     {
       id: 6,
       name: "Italiana",
-      count: 67,
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
+      count: categoryCounts.italiana || 0,
+      key: "italiana",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Autêntica culinária italiana",
       icon: Utensils
@@ -72,8 +118,8 @@ const Restaurantes = () => {
     {
       id: 7,
       name: "Japonesa",
-      count: 94,
-      image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=200&h=150&fit=crop",
+      count: categoryCounts.japonesa || 0,
+      key: "japonesa",
       gradient: "from-checkin-primary-400 to-checkin-primary-800",
       description: "Sushi, sashimi e pratos nipônicos",
       icon: Utensils
@@ -81,8 +127,8 @@ const Restaurantes = () => {
     {
       id: 8,
       name: "Chinesa",
-      count: 78,
-      image: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=200&h=150&fit=crop",
+      count: categoryCounts.chinesa || 0,
+      key: "chinesa",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Tradições culinárias chinesas",
       icon: Utensils
@@ -90,8 +136,8 @@ const Restaurantes = () => {
     {
       id: 9,
       name: "Frutos do Mar",
-      count: 45,
-      image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=200&h=150&fit=crop",
+      count: categoryCounts.frutos_mar || 0,
+      key: "frutos_mar",
       gradient: "from-checkin-primary-300 to-checkin-primary-600",
       description: "Especialidades marinhas",
       icon: Utensils
@@ -99,8 +145,8 @@ const Restaurantes = () => {
     {
       id: 10,
       name: "Fast Food",
-      count: 89,
-      image: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&h=150&fit=crop",
+      count: categoryCounts.fast_food || 0,
+      key: "fast_food",
       gradient: "from-checkin-primary-400 to-checkin-primary-700",
       description: "Opções rápidas e saborosas",
       icon: Utensils
@@ -152,13 +198,7 @@ const Restaurantes = () => {
               const IconComponent = cuisine.icon;
               return (
                 <Card key={cuisine.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105">
-                  <div className={`h-20 ${styles.cardFormater} relative`}>
-                    <img 
-                      src={cuisine.image} 
-                      alt={cuisine.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${cuisine.gradient} opacity-90`} />
+                  <div className={`h-20 ${styles.cardFormater} relative bg-gradient-to-t ${cuisine.gradient}`}>
                     <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-2">
                       <IconComponent className="w-5 h-5 mb-1" />
                       <h3 className="text-sm font-semibold text-center">{cuisine.name}</h3>

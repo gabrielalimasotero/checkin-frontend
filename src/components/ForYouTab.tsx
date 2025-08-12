@@ -371,16 +371,7 @@ const ForYouTab = () => {
   // Renderizar tela principal
   const renderMainScreen = () => (
     <div className={`${LAYOUT.container} ${COMPONENT_VARIANTS.padding.lg} pb-20`}>
-      {/* Botão "Quero sair" */}
-      <div className={`${COMPONENT_VARIANTS.spacing.md}`}>
-        <Button 
-          className={`w-full h-14 ${COMPONENT_VARIANTS.button.primary} text-base font-semibold`}
-          onClick={handleWantToGo}
-        >
-          <User className="w-5 h-5 mr-2" />
-          Quero sair
-        </Button>
-      </div>
+
 
       {/* Suggestions */}
       <div className={LAYOUT.section}>

@@ -5,12 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Eye, MessageSquare } from "lucide-react";
+import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Eye, MessageSquare, EyeOff, Globe, Lock } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
 import MyCheckInsTab from "@/components/MyCheckInsTab";
 import StatusTab from "@/components/StatusTab";
 import OrderTab from "@/components/OrderTab";
 import CheckInDialogs from "@/components/CheckInDialogs";
+import { listEvents, listVenues } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   COMPONENT_VARIANTS, 
   COMMON_CLASSES, 
@@ -21,12 +23,19 @@ import {
 const CheckIn = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [orderItems, setOrderItems] = useState([]);
   const [tableCode, setTableCode] = useState("");
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showPaymentCompleteDialog, setShowPaymentCompleteDialog] = useState(false);
   const [isNearVenue, setIsNearVenue] = useState(false);
   const [activeTab, setActiveTab] = useState("geral");
+  const [todayEvents, setTodayEvents] = useState([]);
+  const [venues, setVenues] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasActiveCheckIn, setHasActiveCheckIn] = useState(false);
+  const [checkInVisibility, setCheckInVisibility] = useState('public'); // 'public' ou 'private'
+  const [activeCheckInVenue, setActiveCheckInVenue] = useState(null);
   
   // Verificar se há parâmetro de aba na URL
   useEffect(() => {
@@ -36,141 +45,50 @@ const CheckIn = () => {
     }
   }, [searchParams]);
 
-  const currentVenue = {
-    name: "Boteco da Maria",
-    table: "Mesa 8",
-    checkInTime: "18:00",
-    isActive: true
-  };
+  // Carregar dados da API
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [eventsData, venuesData] = await Promise.all([
+          listEvents({ limit: 10 }),
+          listVenues({ limit: 5 })
+        ]);
+        setTodayEvents(eventsData || []);
+        setVenues(venuesData || []);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Meus check-ins ativos
-  const myCheckins = [
-    {
-      id: 1,
-      venue: "Boteco da Maria",
-      time: "Hoje 18:00",
-      status: "Ativo",
-      image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=100&h=100&fit=crop"
+    if (user) {
+      loadData();
     }
-  ];
+  }, [user]);
 
-  // Amigos com contas abertas (ainda não pagaram)
-  const friendsWithOpenTabs = [
-    {
-      id: 1,
-      name: "Ana Costa",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
-      venue: "Bar do João",
-      time: "há 30 min",
-      status: "open"
-    },
-    {
-      id: 2,
-      name: "Pedro Lima", 
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
-      venue: "Pizzaria Bella Vista",
-      time: "há 1h",
-      status: "open"
-    }
-  ];
+  // Current venue será obtido da API quando implementarmos check-ins
+  const currentVenue = null;
+
+  // Check-ins serão obtidos da API
+  const myCheckins = [];
+
+  // Amigos com contas abertas serão obtidos da API
+  const friendsWithOpenTabs = [];
 
 
 
-  // Check-ins históricos para avaliação (removido Boteco da Maria)
-  const historicCheckins = [
-    {
-      id: 3,
-      venue: "Café Central",
-      time: "Anteontem 14:20",
-      status: "Finalizado", 
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=100&h=100&fit=crop",
-      totalPaid: 32.00,
-      rating: 5
-    },
-    {
-      id: 4,
-      venue: "Bar do João",
-      time: "3 dias atrás 20:00",
-      status: "Finalizado",
-      image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=100&h=100&fit=crop",
-      totalPaid: 67.80,
-      rating: 3
-    }
-  ];
+  // Histórico de check-ins será obtido da API
+  const historicCheckins = [];
 
-  // Outras coisas rolando hoje
-  const todayEvents = [
-    {
-      id: 2,
-      event: "Happy Hour - Bar do João",
-      venue: "Bar do João",
-      time: "20:00",
-      attendees: 15,
-      friends: ["Ana", "Carlos"]
-    },
-    {
-      id: 3,
-      event: "Noite de Karaokê",
-      venue: "Bar Central",
-      time: "21:00",
-      attendees: 12,
-      friends: ["Marina"]
-    },
-    {
-      id: 4,
-      event: "Show de Jazz",
-      venue: "Café Blues",
-      time: "20:30",
-      attendees: 8,
-      friends: []
-    },
-    {
-      id: 5,
-      event: "Festa de Aniversário",
-      venue: "Casa da Júlia",
-      time: "20:00",
-      attendees: 24,
-      friends: ["Pedro", "Ana", "João"]
-    }
-  ];
 
-  const peopleHere = [
-    { 
-      id: 1, 
-      name: "Maria Silva", 
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face", 
-      isTable: false,
-      isRSVP: false
-    },
-    { 
-      id: 2, 
-      name: "João Santos", 
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face", 
-      isTable: true,
-      isRSVP: false
-    },
-    { 
-      id: 3, 
-      name: "Ana Costa", 
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face", 
-      isTable: true,
-      isRSVP: false
-    },
-    { 
-      id: 4, 
-      name: "Pedro Lima", 
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face", 
-      isTable: false,
-      isRSVP: true
-    }
-  ];
 
-  const menuItems = [
-    { id: 1, name: "Chopp Brahma 300ml", price: 8.50, category: "Bebidas" },
-    { id: 2, name: "Porção de Calabresa", price: 28.00, category: "Petiscos" },
-    { id: 3, name: "Batata Frita", price: 18.00, category: "Petiscos" },
-    { id: 4, name: "Cerveja Heineken", price: 12.00, category: "Bebidas" }
-  ];
+  // Pessoas no local serão obtidas da API
+  const peopleHere = [];
+
+  // Menu será obtido da API
+  const menuItems = [];
 
   const getTotalPrice = () => {
     return orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -201,6 +119,48 @@ const CheckIn = () => {
     setOrderItems([]);
   };
 
+  const handleDoCheckIn = async (venueId) => {
+    try {
+      // TODO: Implementar API de check-in
+      // await createCheckIn({ venue_id: venueId, visibility: checkInVisibility });
+      console.log('Check-in realizado:', { venueId, visibility: checkInVisibility });
+      
+      // Simular check-in ativo
+      const venue = venues.find(v => v.id === venueId);
+      setHasActiveCheckIn(true);
+      setActiveCheckInVenue(venue);
+    } catch (error) {
+      console.error('Erro ao fazer check-in:', error);
+    }
+  };
+
+  const toggleCheckInVisibility = async () => {
+    try {
+      const newVisibility = checkInVisibility === 'public' ? 'private' : 'public';
+      
+      // TODO: Implementar API para alterar visibilidade
+      // await updateCheckInVisibility({ visibility: newVisibility });
+      console.log('Visibilidade alterada para:', newVisibility);
+      
+      setCheckInVisibility(newVisibility);
+    } catch (error) {
+      console.error('Erro ao alterar visibilidade:', error);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      // TODO: Implementar API de check-out
+      // await endCheckIn();
+      console.log('Check-out realizado');
+      
+      setHasActiveCheckIn(false);
+      setActiveCheckInVenue(null);
+    } catch (error) {
+      console.error('Erro ao fazer check-out:', error);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -227,7 +187,7 @@ const CheckIn = () => {
                 variant="ghost" 
                 size="sm" 
                 className="p-2"
-                onClick={() => navigate(`/messages?table=${currentVenue.table}`)}
+                onClick={() => navigate('/messages')}
               >
                 <MessageSquare className="w-5 h-5" />
               </Button>
@@ -243,8 +203,8 @@ const CheckIn = () => {
             {/* Tabs com melhor proporção */}
             <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50">
               <TabsTrigger value="geral" className="text-sm font-medium">Geral</TabsTrigger>
-              <TabsTrigger value="historico" className="text-sm font-medium">Histórico</TabsTrigger>
               <TabsTrigger value="ativo" className="text-sm font-medium">Ativo</TabsTrigger>
+              <TabsTrigger value="historico" className="text-sm font-medium">Histórico</TabsTrigger>
             </TabsList>
 
             <TabsContent value="geral" className={LAYOUT.section}>
@@ -257,28 +217,50 @@ const CheckIn = () => {
                     Contas Abertas
                   </h3>
                   <Badge variant="secondary" className="text-xs">
-                    {friendsWithOpenTabs.length + 1}
+                    {friendsWithOpenTabs.length + (currentVenue ? 1 : 0)}
                   </Badge>
                 </div>
                 <div className={COMPONENT_VARIANTS.spacing.md}>
                   {/* Check-in do usuário no topo */}
-                  <div className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-primary/50 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors`}>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/30">
-                        <span className="text-primary font-bold text-sm">CM</span>
+                  {currentVenue ? (
+                    <div className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-primary/50 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors`}>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center border-2 border-primary/30">
+                          <span className="text-primary font-bold text-sm">Eu</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Você</div>
+                          <div className="text-caption">{currentVenue.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">Desde {currentVenue.checkInTime}</div>
+                        </div>
+                        <div className="flex flex-col items-end space-y-2">
+                          <Button variant="ghost" size="sm" className="text-xs h-7">
+                            Ver local
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">Você</div>
-                        <div className="text-caption">{currentVenue.name}</div>
-                        <div className="text-xs text-muted-foreground mt-1">Desde {currentVenue.checkInTime}</div>
-                      </div>
-                      <div className="flex flex-col items-end space-y-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7">
-                          Ver local
+                    </div>
+                  ) : (
+                    <div className={`${COMPONENT_VARIANTS.padding.md} border-l-4 border-muted rounded-lg bg-muted/10`}>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-muted/20 rounded-full flex items-center justify-center">
+                          <MapPin className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-muted-foreground">Nenhum check-in ativo</div>
+                          <div className="text-xs text-muted-foreground mt-1">Faça check-in em um local para começar</div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs h-7"
+                          onClick={() => navigate('/home')}
+                        >
+                          Explorar
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Check-ins dos amigos */}
                   {friendsWithOpenTabs.map((friend) => (
@@ -411,13 +393,120 @@ const CheckIn = () => {
             </TabsContent>
 
             <TabsContent value="ativo" className={LAYOUT.section}>
-              <StatusTab
-                peopleHere={peopleHere}
-                tableCode={tableCode}
-                setTableCode={setTableCode}
-                onCheckIn={handleCheckIn}
-                onRSVP={handleRSVP}
-              />
+              {!hasActiveCheckIn ? (
+                // Estado: Sem check-in ativo - Mostrar opção de fazer check-in
+                <Card className={COMPONENT_VARIANTS.card.standard}>
+                  <div className="text-center py-8">
+                    <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Nenhum check-in ativo</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Escolha um local próximo para fazer check-in
+                    </p>
+                    
+                    {/* Lista de venues próximos para check-in */}
+                    {venues.length > 0 ? (
+                      <div className="space-y-3 max-w-md mx-auto">
+                        {venues.slice(0, 3).map((venue) => (
+                          <Card key={venue.id} className="p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                                  <MapPin className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <div className="text-left">
+                                  <div className="font-medium">{venue.name}</div>
+                                  <div className="text-sm text-muted-foreground">{venue.category}</div>
+                                </div>
+                              </div>
+                              <Button 
+                                size="sm"
+                                onClick={() => handleDoCheckIn(venue.id)}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                Check-in
+                              </Button>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">
+                        Nenhum local disponível no momento
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ) : (
+                // Estado: Com check-in ativo - Mostrar opções de visibilidade
+                <div className="space-y-4">
+                  <Card className={COMPONENT_VARIANTS.card.standard}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <MapPin className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-semibold">{activeCheckInVenue?.name || 'Local Ativo'}</div>
+                          <div className="text-sm text-muted-foreground">Check-in ativo</div>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-100 text-green-700">
+                        Ativo
+                      </Badge>
+                    </div>
+
+                    {/* Controle de Visibilidade */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          {checkInVisibility === 'public' ? (
+                            <Globe className="w-5 h-5 text-primary" />
+                          ) : (
+                            <Lock className="w-5 h-5 text-muted-foreground" />
+                          )}
+                          <div>
+                            <div className="font-medium">
+                              {checkInVisibility === 'public' ? 'Público' : 'Privado'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {checkInVisibility === 'public' 
+                                ? 'Seus amigos podem ver onde você está'
+                                : 'Apenas você pode ver este check-in'
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={toggleCheckInVisibility}
+                        >
+                          {checkInVisibility === 'public' ? (
+                            <>
+                              <EyeOff className="w-4 h-4 mr-2" />
+                              Tornar Privado
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Tornar Público
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Botão de Check-out */}
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleCheckOut}
+                      >
+                        Fazer Check-out
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="cardapio" className={LAYOUT.section}>

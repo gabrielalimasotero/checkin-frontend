@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,14 +13,31 @@ import Post from "./pages/Post";
 import Restaurantes from "./pages/Restaurantes";
 import Profile from "./pages/Profile";
 import VenueDetails from "./pages/VenueDetails";
-import BotecoDaMariaProfile from "./pages/BotecoDaMariaProfile";
 import Status from "./pages/Status";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
+import Invites from "./pages/Invites";
+import Assistant from "./pages/Assistant";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import MainNavigation from "@/components/MainNavigation";
 
 const queryClient = new QueryClient();
+
+// Component to conditionally render navigation
+const ConditionalNavigation = () => {
+  const location = useLocation();
+  
+  // Pages that shouldn't show navigation
+  const noNavPages = ['/welcome', '/auth/callback'];
+  
+  // Don't show navigation on auth pages
+  if (noNavPages.includes(location.pathname)) {
+    return null;
+  }
+  
+  return <MainNavigation />;
+};
 
 function App() {
   return (
@@ -69,11 +86,6 @@ function App() {
                     <VenueDetails />
                   </ProtectedRoute>
                 } />
-                <Route path="/venue/boteco-da-maria" element={
-                  <ProtectedRoute>
-                    <BotecoDaMariaProfile />
-                  </ProtectedRoute>
-                } />
                 <Route path="/status" element={
                   <ProtectedRoute>
                     <Status />
@@ -89,9 +101,24 @@ function App() {
                     <Messages />
                   </ProtectedRoute>
                 } />
+                <Route path="/invites" element={
+                  <ProtectedRoute>
+                    <Invites />
+                  </ProtectedRoute>
+                } />
+                <Route path="/assistant" element={
+                  <ProtectedRoute>
+                    <Assistant />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <MainNavigation />
+              <ConditionalNavigation />
             </div>
           </div>
           <Toaster />

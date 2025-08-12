@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { listInterests, createInterest, getUserInterests, addUserInterest, removeUserInterest } from '@/lib/api';
+import { listInterests, createInterest, getUserInterests, addUserInterest, removeUserInterest, listGroups } from '@/lib/api';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -85,11 +85,21 @@ const Profile = () => {
   // Estado para interesses temporários (antes de salvar)
   const [tempSelectedInterests, setTempSelectedInterests] = useState<string[]>([]);
 
-  // Grupos do usuário baseados em interesses
-  const [userGroups, setUserGroups] = useState([
-    { id: 1, name: 'Turma da Champions', interests: ['Champions League'], members: 12, role: 'admin', nextEvent: 'Hoje 21:00' },
-    { id: 2, name: 'Grupo da Sinuca', interests: ['Sinuca', 'Jogos'], members: 6, role: 'membro', nextEvent: 'Sexta 20:00' }
-  ]);
+  // Grupos do usuário serão obtidos da API
+  const [userGroups, setUserGroups] = useState<any[]>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+
+  // Estados para estatísticas reais
+  const [stats, setStats] = useState({
+    checkins: 0,
+    reviews: 0,
+    friends: 0,
+    badges: 0
+  });
+  const [checkinsData, setCheckinsData] = useState<any[]>([]);
+  const [reviewsData, setReviewsData] = useState<any[]>([]);
+  const [friendsData, setFriendsData] = useState<any[]>([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -151,6 +161,30 @@ const Profile = () => {
       console.error('❌ Erro ao carregar interesses:', error);
     } finally {
       setIsLoadingInterests(false);
+    }
+  };
+
+  const loadUserGroups = async () => {
+    if (!user?.id) {
+      console.log('❌ Usuário não autenticado, não é possível carregar grupos');
+      return;
+    }
+    
+    try {
+      setIsLoadingGroups(true);
+      console.log('🔄 Carregando grupos do usuário (backend):', user.id);
+      // TODO: Implementar filtro por usuário quando estiver disponível na API
+      const allGroups = await listGroups({ limit: 50 });
+      // Por enquanto, filtrar do lado cliente (não ideal, mas funcional)
+      // const userGroups = allGroups.filter(g => g.created_by === user.id || g.members?.includes(user.id));
+      // Como não temos essa info, vamos usar lista vazia por enquanto
+      setUserGroups([]);
+      console.log('✅ Grupos carregados:', []);
+    } catch (error) {
+      console.error('❌ Erro ao carregar grupos:', error);
+      setUserGroups([]);
+    } finally {
+      setIsLoadingGroups(false);
     }
   };
 
@@ -256,43 +290,53 @@ const Profile = () => {
   useEffect(() => {
     if (user?.id) {
       loadUserInterests();
+      loadUserGroups();
+      loadUserStats();
     }
   }, [user?.id]);
 
-  // Stats
-  const stats = {
-    checkins: 47,
-    reviews: 23,
-    friends: 156,
-    badges: 8
+  // Função para carregar estatísticas do usuário
+  const loadUserStats = async () => {
+    if (!user?.id) {
+      console.log('❌ Usuário não autenticado, não é possível carregar estatísticas');
+      return;
+    }
+    
+    try {
+      setIsLoadingStats(true);
+      console.log('🔄 Carregando estatísticas do usuário (backend):', user.id);
+      
+      // TODO: Implementar endpoints para estatísticas quando estiverem disponíveis
+      // const userCheckins = await getUserCheckins(user.id);
+      // const userReviews = await getUserReviews(user.id);
+      // const userFriends = await getUserFriends(user.id);
+      // const userBadges = await getUserBadges(user.id);
+      
+      // Por enquanto, usar contadores zerados até implementar API
+      setStats({
+        checkins: 0,
+        reviews: 0,
+        friends: 0,
+        badges: 0
+      });
+      setCheckinsData([]);
+      setReviewsData([]);
+      setFriendsData([]);
+      
+      console.log('✅ Estatísticas carregadas (vazias por enquanto)');
+    } catch (error) {
+      console.error('❌ Erro ao carregar estatísticas:', error);
+      setStats({ checkins: 0, reviews: 0, friends: 0, badges: 0 });
+      setCheckinsData([]);
+      setReviewsData([]);
+      setFriendsData([]);
+    } finally {
+      setIsLoadingStats(false);
+    }
   };
 
-  // Dados detalhados para os dialogs
-  const checkinsData = [
-    { id: 1, venue: "Boteco da Maria", date: "Hoje", rating: 5, spent: 45.80 },
-    { id: 2, venue: "Café Central", date: "Ontem", rating: 4, spent: 28.50 },
-    { id: 3, venue: "Bar do João", date: "2 dias atrás", rating: 5, spent: 67.20 },
-    { id: 4, venue: "Pizza Express", date: "3 dias atrás", rating: 3, spent: 52.90 }
-  ];
-
-  const reviewsData = [
-    { id: 1, venue: "Boteco da Maria", rating: 5, comment: "Ambiente incrível!", date: "Hoje" },
-    { id: 2, venue: "Café Central", rating: 4, comment: "Bom café e atendimento", date: "Ontem" },
-    { id: 3, venue: "Bar do João", rating: 5, comment: "Melhor happy hour da cidade", date: "2 dias atrás" }
-  ];
-
-  const friendsData = [
-    { id: 1, name: "Ana Silva", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop", mutualFriends: 12, lastSeen: "Boteco da Maria" },
-    { id: 2, name: "João Santos", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop", mutualFriends: 8, lastSeen: "Café Central" },
-    { id: 3, name: "Maria Costa", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop", mutualFriends: 15, lastSeen: "Bar do Rock" }
-  ];
-
-  const badgesData = [
-    { id: 1, name: "Explorador", description: "Visitou 10+ lugares diferentes", icon: "🗺️", earned: "Há 3 dias" },
-    { id: 2, name: "Social", description: "Conectou com 50+ pessoas", icon: "👥", earned: "Há 1 semana" },
-    { id: 3, name: "Crítico", description: "Fez 20+ avaliações", icon: "⭐", earned: "Há 2 semanas" },
-    { id: 4, name: "Fotógrafo", description: "Compartilhou 30+ fotos", icon: "📷", earned: "Há 1 mês" }
-  ];
+  // Badges serão obtidos da API
+  const [badgesData, setBadgesData] = useState<any[]>([]);
 
   return (
     <div className="mobile-viewport bg-background flex flex-col">
@@ -321,11 +365,7 @@ const Profile = () => {
                 <p className="text-primary-foreground/70 text-xs">{user?.email || "email@example.com"}</p>
               </>
             )}
-            <div className="flex items-center space-x-1.5 mt-1">
-              <Badge className="bg-primary-foreground/20 text-primary-foreground text-xs h-5 px-2">
-                ✓ Conectável
-              </Badge>
-            </div>
+
           </div>
           <div className="flex space-x-1">
             {isEditing ? (
@@ -357,14 +397,25 @@ const Profile = () => {
                 </Button>
               </>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
-              >
-                <Edit3 className="w-4 h-4" />
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/settings')}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                  title="Configurações de Privacidade"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+              </>
             )}
           </div>
         </div>

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { listGroups, listVenues } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ const Social = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"lugares" | "grupos" | "pessoas">("lugares");
+  const [interestGroups, setInterestGroups] = useState<any[]>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+  const [nearbyPeople, setNearbyPeople] = useState<Person[]>([]);
+  const [isLoadingPeople, setIsLoadingPeople] = useState(false);
 
   const [showMeetPeople, setShowMeetPeople] = useState(false);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
@@ -39,6 +44,56 @@ const Social = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState("");
   const [peopleFilter, setPeopleFilter] = useState<"todos" | "homens" | "mulheres">("todos");
+
+  // Estados para contagens de categorias
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
+  // Carregar grupos da API e contagens de categorias
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoadingGroups(true);
+        
+        // Carregar grupos
+        const groups = await listGroups({ limit: 20 });
+        setInterestGroups(groups || []);
+
+        // Carregar venues para contar por categoria
+        const venues = await listVenues({ limit: 1000 });
+        
+        // Contar por categoria
+        const counts: Record<string, number> = {};
+        venues.forEach((venue: any) => {
+          const category = venue.category?.toLowerCase() || 'outros';
+          counts[category] = (counts[category] || 0) + 1;
+        });
+
+        // Mapear contagens para as categorias da UI
+        const mappedCounts = {
+          restaurantes: counts['restaurante'] || counts['restaurant'] || counts['comida'] || 0,
+          bares: counts['bar'] || counts['pub'] || counts['cervejaria'] || 0,
+          eventos: counts['evento'] || counts['event'] || 0,
+          shows: counts['show'] || counts['música'] || counts['musica'] || counts['concerto'] || 0,
+          cafes: counts['café'] || counts['cafe'] || counts['cafeteria'] || 0,
+          promocoes: venues.filter((v: any) => v.has_promotions || v.discount_percentage > 0).length,
+          docerias: counts['doceria'] || counts['doces'] || counts['confeitaria'] || counts['sobremesa'] || 0,
+          padarias: counts['padaria'] || counts['bakery'] || counts['pão'] || counts['pao'] || 0,
+          sorveterias: counts['sorveteria'] || counts['sorvete'] || counts['gelato'] || counts['ice cream'] || 0,
+          acai: counts['açaí'] || counts['acai'] || counts['açai'] || 0,
+        };
+
+        setCategoryCounts(mappedCounts);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        setInterestGroups([]);
+        setCategoryCounts({});
+      } finally {
+        setIsLoadingGroups(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Lista de bares disponíveis
   const availableBars = [
@@ -86,8 +141,7 @@ const Social = () => {
       id: 1,
       name: "Restaurantes",
       icon: Utensils,
-      count: 247,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=150&fit=crop",
+      count: categoryCounts.restaurantes || 0,
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: true,
       route: "/restaurantes"
@@ -96,8 +150,7 @@ const Social = () => {
       id: 2,
       name: "Bares",
       icon: Music,
-      count: 203,
-      image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=200&h=150&fit=crop",
+      count: categoryCounts.bares || 0,
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: true
     },
@@ -105,8 +158,7 @@ const Social = () => {
       id: 3,
       name: "Eventos",
       icon: Calendar,
-      count: 89,
-      image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=150&fit=crop",
+      count: categoryCounts.eventos || 0,
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
@@ -114,8 +166,7 @@ const Social = () => {
       id: 4,
       name: "Shows",
       icon: Music,
-      count: 156,
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=150&fit=crop",
+      count: categoryCounts.shows || 0,
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     },
@@ -123,187 +174,55 @@ const Social = () => {
       id: 5,
       name: "Cafés",
       icon: Coffee,
-      count: 78,
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&h=150&fit=crop",
+      count: categoryCounts.cafes || 0,
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: false
     },
     {
       id: 6,
-      name: "Promoções",
-      icon: Percent,
-      count: 124,
-      image: "https://images.unsplash.com/photo-1607083206869-4c7d0c21e65c?w=200&h=150&fit=crop",
-      gradient: "from-checkin-primary-400 to-checkin-primary-800",
-      clickable: false
-    },
-    {
-      id: 7,
       name: "Docerias",
       icon: Cookie,
-      count: 45,
-      image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=150&fit=crop",
+      count: categoryCounts.docerias || 0,
       gradient: "from-checkin-primary-200 to-checkin-primary-400",
       clickable: false
     },
     {
-      id: 8,
+      id: 7,
       name: "Padarias",
       icon: ChefHat,
-      count: 67,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=150&fit=crop",
+      count: categoryCounts.padarias || 0,
+      gradient: "from-checkin-primary-300 to-checkin-primary-500",
+      clickable: false
+    },
+    {
+      id: 8,
+      name: "Sorveterias",
+      icon: IceCream,
+      count: categoryCounts.sorveterias || 0,
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
       id: 9,
-      name: "Sorveterias",
+      name: "Açaí",
       icon: IceCream,
-      count: 32,
-      image: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=200&h=150&fit=crop",
-      gradient: "from-checkin-primary-300 to-checkin-primary-500",
+      count: categoryCounts.acai || 0,
+      gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     },
     {
       id: 10,
-      name: "Açaí",
-      icon: IceCream,
-      count: 28,
-      image: "https://images.unsplash.com/photo-1605801234031-3d5ad5b51c52?w=200&h=150&fit=crop",
-      gradient: "from-checkin-primary-400 to-checkin-primary-600",
+      name: "Promoções",
+      icon: Percent,
+      count: categoryCounts.promocoes || 0,
+      gradient: "from-checkin-primary-400 to-checkin-primary-800",
       clickable: false
     }
   ];
 
-  // Grupos baseados em interesses e proximidade
-  const interestGroups = [
-    {
-      id: 1,
-      name: "Champions League ZN",
-      interest: "Champions League",
-      avatar: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=50&h=50&fit=crop",
-      members: 36,
-      mutualFriends: 8,
-      radius: "5km",
-      description: "Assistir jogos da Champions em bares da região",
-      nextEvent: "Hoje 21:00 - Bar do João",
-      isJoined: false,
-      tags: ["futebol", "champions league", "bar"]
-    },
-    {
-      id: 2,
-      name: "Amantes do Rock",
-      interest: "Rock",
-      avatar: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=50&h=50&fit=crop",
-      members: 13,
-      mutualFriends: 5,
-      radius: "3km", 
-      description: "Shows de rock e música ao vivo na região",
-      nextEvent: "Sexta 20:00 - Café Blues",
-      isJoined: true,
-      tags: ["rock", "música ao vivo", "show"]
-    },
-    {
-      id: 3,
-      name: "Cafés & Trabalho",
-      interest: "Café",
-      avatar: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=50&h=50&fit=crop",
-      members: 25,
-      mutualFriends: 12,
-      radius: "2km",
-      description: "Cafeterias para trabalhar e networking",
-      nextEvent: "Amanhã 14:00 - Café Cultural",
-      isJoined: false,
-      tags: ["café", "trabalho", "networking"]
-    },
-    {
-      id: 4,
-      name: "Pizza Lovers",
-      interest: "Pizza",
-      avatar: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=50&h=50&fit=crop",
-      members: 156,
-      mutualFriends: 3,
-      radius: "4km",
-      description: "Descobrindo as melhores pizzarias",
-      nextEvent: "Sábado 19:00 - Pizzaria Bella",
-      isJoined: false,
-      tags: ["pizza", "gastronomia", "jantar"]
-    }
-  ];
 
-  // Pessoas próximas com filtros de compatibilidade
-  const nearbyPeople: Person[] = [
-    {
-      id: 1,
-      name: "Ana Silva",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-      distance: "0.2km",
-      venue: "Café Central",
-      interests: ["café", "trabalho"],
-      mutualFriends: 3,
-      connectionType: "1º grau",
-      compatibility: 92,
-      commonInterests: ["Champions League", "Café"],
-      clickable: true,
-      gender: "mulheres"
-    },
-    {
-      id: 2,
-      name: "Carlos Santos",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-      distance: "0.5km",
-      venue: "Bar do Rock",
-      interests: ["música", "cerveja"],
-      mutualFriends: 1,
-      connectionType: "2º grau",
-      compatibility: 85,
-      commonInterests: ["Rock", "Craft Beer"],
-      clickable: false,
-      gender: "homens"
-    },
-    {
-      id: 3,
-      name: "Mariana Costa",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-      distance: "0.8km",
-      venue: "Pizzaria Bella",
-      interests: ["pizza", "amigos"],
-      mutualFriends: 5,
-      connectionType: "1º grau",
-      compatibility: 88,
-      commonInterests: ["Pizza", "Futebol"],
-      clickable: false,
-      gender: "mulheres"
-    },
-    {
-      id: 4,
-      name: "Pedro Oliveira",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-      distance: "1.2km",
-      venue: "Café Cultural",
-      interests: ["café", "arte"],
-      mutualFriends: 2,
-      connectionType: "2º grau",
-      compatibility: 78,
-      commonInterests: ["Arte", "Café"],
-      clickable: false,
-      gender: "homens"
-    },
-    {
-      id: 5,
-      name: "Juliana Santos",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=50&h=50&fit=crop&crop=face",
-      distance: "0.6km",
-      venue: "Bar do João",
-      interests: ["música", "dança"],
-      mutualFriends: 4,
-      connectionType: "1º grau",
-      compatibility: 91,
-      commonInterests: ["Música", "Dança"],
-      clickable: true,
-      gender: "mulheres"
-    }
-  ];
+
+
 
   const getConnectionBadgeColor = (type: string) => {
     switch (type) {
@@ -529,13 +448,7 @@ const Social = () => {
                       }`}
                       onClick={() => handleCategoryClick(category)}
                     >
-                      <div className={`h-20 ${styles.cardFormater} relative`}>
-                        <img 
-                          src={category.image} 
-                          alt={category.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient} opacity-90`} />
+                      <div className={`h-20 ${styles.cardFormater} relative bg-gradient-to-t ${category.gradient}`}>
                         <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-2">
                           <IconComponent className="w-5 h-5 mb-1" />
                           <h3 className="text-sm font-semibold text-center">{category.name}</h3>
@@ -564,7 +477,7 @@ const Social = () => {
             
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary">
-                <span className="font-medium">🎯 Grupos Personalizados:</span> Baseados nos seus interesses e localização. Participe ou crie novos grupos!
+                <span className="font-medium">Grupos Personalizados:</span> Baseados nos seus interesses e localização. Participe ou crie novos grupos!
               </p>
             </div>
 
@@ -662,7 +575,7 @@ const Social = () => {
             
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary">
-                <span className="font-medium">🔍 Baseado em:</span> Seus interesses, localização atual e amigos em comum
+                <span className="font-medium">Baseado em:</span> Seus interesses, localização atual e amigos em comum
               </p>
             </div>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,15 +26,30 @@ const CreateGroupDialog = ({ isOpen, onClose }: CreateGroupDialogProps) => {
   const [interests, setInterests] = useState<string[]>([]);
   const [newInterest, setNewInterest] = useState("");
   const [selectedFriends, setSelectedFriends] = useState<number[]>([]);
+  const [availableFriends, setAvailableFriends] = useState<Friend[]>([]);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(false);
 
-  // Lista de amigos disponíveis
-  const availableFriends: Friend[] = [
-    { id: 1, name: "Ana Silva", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop", isSelected: false },
-    { id: 2, name: "João Santos", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop", isSelected: false },
-    { id: 3, name: "Maria Costa", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop", isSelected: false },
-    { id: 4, name: "Pedro Lima", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop", isSelected: false },
-    { id: 5, name: "Juliana Santos", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop", isSelected: false },
-  ];
+  // Carregar amigos da API quando o dialog abrir
+  useEffect(() => {
+    const loadFriends = async () => {
+      if (!isOpen) return;
+      
+      try {
+        setIsLoadingFriends(true);
+        // TODO: Implementar chamada da API para listar amigos
+        // const friends = await listFriends();
+        // setAvailableFriends(friends.map(f => ({ ...f, isSelected: false })));
+        setAvailableFriends([]); // Por enquanto, lista vazia até implementar API
+      } catch (error) {
+        console.error('Erro ao carregar amigos:', error);
+        setAvailableFriends([]);
+      } finally {
+        setIsLoadingFriends(false);
+      }
+    };
+
+    loadFriends();
+  }, [isOpen]);
 
   const addInterest = () => {
     if (newInterest.trim() && !interests.includes(newInterest.trim())) {
@@ -162,34 +177,44 @@ const CreateGroupDialog = ({ isOpen, onClose }: CreateGroupDialogProps) => {
           <div className="space-y-2">
             <Label>Convidar Amigos</Label>
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {availableFriends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className={`flex items-center space-x-3 p-2 rounded-lg border cursor-pointer transition-colors ${
-                    selectedFriends.includes(friend.id)
-                      ? 'bg-primary/10 border-primary/30'
-                      : 'hover:bg-gray-50 border-gray-200'
-                  }`}
-                  onClick={() => toggleFriendSelection(friend.id)}
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={friend.avatar} />
-                    <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className="flex-1 text-sm font-medium">{friend.name}</span>
-                  <div className={`w-4 h-4 rounded-full border-2 ${
-                    selectedFriends.includes(friend.id)
-                      ? 'bg-primary border-primary'
-                      : 'border-gray-300'
-                  }`}>
-                    {selectedFriends.includes(friend.id) && (
-                      <div className="w-full h-full bg-primary rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      </div>
-                    )}
-                  </div>
+              {isLoadingFriends ? (
+                <div className="text-sm text-gray-500 p-4 text-center">
+                  Carregando amigos...
                 </div>
-              ))}
+              ) : availableFriends.length === 0 ? (
+                <div className="text-sm text-gray-500 p-4 text-center">
+                  Nenhum amigo encontrado. Faça amizades no app para convidá-los para grupos!
+                </div>
+              ) : (
+                availableFriends.map((friend) => (
+                  <div
+                    key={friend.id}
+                    className={`flex items-center space-x-3 p-2 rounded-lg border cursor-pointer transition-colors ${
+                      selectedFriends.includes(friend.id)
+                        ? 'bg-primary/10 border-primary/30'
+                        : 'hover:bg-gray-50 border-gray-200'
+                    }`}
+                    onClick={() => toggleFriendSelection(friend.id)}
+                  >
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={friend.avatar} />
+                      <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="flex-1 text-sm font-medium">{friend.name}</span>
+                    <div className={`w-4 h-4 rounded-full border-2 ${
+                      selectedFriends.includes(friend.id)
+                        ? 'bg-primary border-primary'
+                        : 'border-gray-300'
+                    }`}>
+                      {selectedFriends.includes(friend.id) && (
+                        <div className="w-full h-full bg-primary rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             {selectedFriends.length > 0 && (
               <p className="text-xs text-gray-500">

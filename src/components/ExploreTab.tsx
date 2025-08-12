@@ -44,7 +44,6 @@ const ExploreTab = () => {
 
   const categories = [
     { id: "all", label: "Todos" },
-    { id: "friends", label: "Seus Amigos" },
     { id: "promotions", label: "Promoções" },
     { id: "restaurant", label: "Restaurantes" },
     { id: "bar", label: "Bares" },
@@ -52,92 +51,7 @@ const ExploreTab = () => {
     { id: "event", label: "Eventos" },
   ];
 
-  const trendingPlaces = [
-    {
-      id: 1,
-      name: "Restaurante Bella Vista",
-      category: "Italiano",
-      rating: 4.8,
-      reviews: 234,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop",
-      distance: "0.8 km",
-      priceRange: "$$",
-      trending: true,
-      description: "Autêntica culinária italiana com vista panorâmica",
-      filterType: "restaurant"
-    },
-    {
-      id: 2,
-      name: "Bar do Rock",
-      category: "Bar",
-      rating: 4.6,
-      reviews: 156,
-      image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=300&h=200&fit=crop",
-      distance: "1.2 km",
-      priceRange: "$",
-      trending: true,
-      description: "Música ao vivo e drinks artesanais",
-      filterType: "bar",
-      friendsHere: ["Ana Silva", "João Santos"]
-    },
-    {
-      id: 3,
-      name: "Club Underground",
-      category: "Balada",
-      rating: 4.7,
-      reviews: 89,
-      image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=300&h=200&fit=crop",
-      distance: "2.1 km",
-      priceRange: "$$",
-      trending: true,
-      description: "Música eletrônica e ambiente underground",
-      filterType: "show"
-    },
-    {
-      id: 4,
-      name: "Café Central",
-      category: "Café",
-      rating: 4.5,
-      reviews: 189,
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=300&h=200&fit=crop",
-      distance: "0.5 km",
-      priceRange: "$",
-      trending: false,
-      description: "Café artesanal e ambiente para trabalho",
-      filterType: "restaurant",
-      friendsHere: ["Maria Costa", "Pedro Lima"],
-      promotion: "2x1 em cappuccinos até 10h"
-    },
-    {
-      id: 5,
-      name: "Pizzaria Express",
-      category: "Pizzaria",
-      rating: 4.3,
-      reviews: 267,
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop",
-      distance: "1.8 km",
-      priceRange: "$$",
-      trending: false,
-      description: "Pizzas tradicionais e delivery rápido",
-      filterType: "restaurant",
-      promotion: "30% off em pedidos acima de R$ 50"
-    },
-    {
-      id: 6,
-      name: "Academia Fitness Pro",
-      category: "Academia",
-      rating: 4.9,
-      reviews: 445,
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop",
-      distance: "0.3 km",
-      priceRange: "$$$",
-      trending: true,
-      description: "Academia completa com personal trainers",
-      filterType: "event",
-      friendsHere: ["Carlos Mendonça", "Juliana Santos"],
-      promotion: "1ª semana grátis para novos alunos"
-    }
-  ];
+
 
   // Filtrar lugares baseado na categoria selecionada (somente dados do backend)
   const filteredPlaces = selectedCategory === "all"
@@ -148,13 +62,17 @@ const ExploreTab = () => {
     <div className="p-4 pb-20 space-y-4">
 
       {/* Category Filter */}
-      <div className="flex space-x-2 overflow-x-auto pb-2">
+      <div className="flex space-x-3 overflow-x-auto pb-3 px-1 scrollbar-hide scroll-smooth">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
             size="sm"
-            className="whitespace-nowrap"
+            className={`whitespace-nowrap min-w-fit px-4 py-2 rounded-full transition-all duration-200 ${
+              selectedCategory === category.id 
+                ? "bg-primary text-primary-foreground shadow-md scale-105" 
+                : "bg-background border-border hover:border-primary/50 hover:bg-primary/5"
+            }`}
             onClick={() => setSelectedCategory(category.id)}
           >
             {category.label}

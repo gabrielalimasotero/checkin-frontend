@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, MapPin, Heart, MessageSquare, Users2, Utensils, Coffee, Music, Star, Target, Calendar, Users, ChevronDown, Filter, Percent, IceCream, ChefHat, Cookie } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
+import styles from "@/styles/social.module.css";
 
 import MeetNewPeopleDialog from "@/components/MeetNewPeopleDialog";
 import CreateGroupDialog from "@/components/CreateGroupDialog";
@@ -517,7 +518,7 @@ const Social = () => {
           ) : (
             /* Categorias Explorar */
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className={`grid ${styles.gridFormater} grid-cols-2 gap-3`}>
                 {exploreCategories.map((category) => {
                   const IconComponent = category.icon;
                   return (
@@ -528,7 +529,7 @@ const Social = () => {
                       }`}
                       onClick={() => handleCategoryClick(category)}
                     >
-                      <div className="h-20 relative">
+                      <div className={`h-20 ${styles.cardFormater} relative`}>
                         <img 
                           src={category.image} 
                           alt={category.name}

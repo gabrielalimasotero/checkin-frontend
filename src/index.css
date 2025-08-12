@@ -195,7 +195,6 @@
     width: 100%;
     max-width: 390px; /* iPhone 14 Pro width */
     height: 100vh;
-    max-height: 844px; /* iPhone 14 Pro height */
     margin: 0 auto;
     position: relative;
     overflow: hidden;

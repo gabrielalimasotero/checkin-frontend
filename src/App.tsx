@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
@@ -21,6 +21,21 @@ import NotFound from "./pages/NotFound";
 import MainNavigation from "@/components/MainNavigation";
 
 const queryClient = new QueryClient();
+
+// Component to conditionally render navigation
+const ConditionalNavigation = () => {
+  const location = useLocation();
+  
+  // Pages that shouldn't show navigation
+  const noNavPages = ['/welcome', '/auth/callback'];
+  
+  // Don't show navigation on auth pages
+  if (noNavPages.includes(location.pathname)) {
+    return null;
+  }
+  
+  return <MainNavigation />;
+};
 
 function App() {
   return (
@@ -91,7 +106,7 @@ function App() {
                 } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <MainNavigation />
+              <ConditionalNavigation />
             </div>
           </div>
           <Toaster />

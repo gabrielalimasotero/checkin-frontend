@@ -1,0 +1,21 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- C shape with location pin point -->
+  <path d="M40 10C27.297 10 17 20.297 17 33C17 45.703 27.297 56 40 56C52.703 56 63 45.703 63 33" 
+        stroke="#084d6e" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Location pin point extending from bottom center -->
+  <path d="M40 56 L40 68" 
+        stroke="#084d6e" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Inner detail circle -->
+  <circle cx="40" cy="33" r="12" 
+          stroke="#084d6e" 
+          stroke-width="4" 
+          fill="none"/>
+</svg>

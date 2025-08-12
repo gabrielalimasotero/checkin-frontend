@@ -142,7 +142,6 @@ const Social = () => {
       name: "Restaurantes",
       icon: Utensils,
       count: categoryCounts.restaurantes || 0,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: true,
       route: "/restaurantes"
@@ -152,7 +151,6 @@ const Social = () => {
       name: "Bares",
       icon: Music,
       count: categoryCounts.bares || 0,
-      image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: true
     },
@@ -161,7 +159,6 @@ const Social = () => {
       name: "Eventos",
       icon: Calendar,
       count: categoryCounts.eventos || 0,
-      image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
@@ -170,7 +167,6 @@ const Social = () => {
       name: "Shows",
       icon: Music,
       count: categoryCounts.shows || 0,
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     },
@@ -179,7 +175,6 @@ const Social = () => {
       name: "Cafés",
       icon: Coffee,
       count: categoryCounts.cafes || 0,
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: false
     },
@@ -188,7 +183,6 @@ const Social = () => {
       name: "Docerias",
       icon: Cookie,
       count: categoryCounts.docerias || 0,
-      image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-200 to-checkin-primary-400",
       clickable: false
     },
@@ -197,7 +191,6 @@ const Social = () => {
       name: "Padarias",
       icon: ChefHat,
       count: categoryCounts.padarias || 0,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
@@ -206,7 +199,6 @@ const Social = () => {
       name: "Sorveterias",
       icon: IceCream,
       count: categoryCounts.sorveterias || 0,
-      image: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
@@ -215,7 +207,6 @@ const Social = () => {
       name: "Açaí",
       icon: IceCream,
       count: categoryCounts.acai || 0,
-      image: "https://images.unsplash.com/photo-1605801234031-3d5ad5b51c52?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
     },
@@ -224,7 +215,6 @@ const Social = () => {
       name: "Promoções",
       icon: Percent,
       count: categoryCounts.promocoes || 0,
-      image: "https://images.unsplash.com/photo-1607083206869-4c7d0c21e65c?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-800",
       clickable: false
     }
@@ -458,13 +448,7 @@ const Social = () => {
                       }`}
                       onClick={() => handleCategoryClick(category)}
                     >
-                      <div className={`h-20 ${styles.cardFormater} relative`}>
-                        <img 
-                          src={category.image} 
-                          alt={category.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient} opacity-90`} />
+                      <div className={`h-20 ${styles.cardFormater} relative bg-gradient-to-t ${category.gradient}`}>
                         <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-2">
                           <IconComponent className="w-5 h-5 mb-1" />
                           <h3 className="text-sm font-semibold text-center">{category.name}</h3>

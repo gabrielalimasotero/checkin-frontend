@@ -66,7 +66,6 @@ const Restaurantes = () => {
       name: "Melhores Avaliados",
       count: categoryCounts.melhor_avaliado || 0,
       key: "melhor_avaliado",
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Top restaurantes da cidade",
       icon: Award
@@ -76,7 +75,6 @@ const Restaurantes = () => {
       name: "Brasileira",
       count: categoryCounts.brasileira || 0,
       key: "brasileira",
-      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Sabores tradicionais do Brasil",
       icon: Heart
@@ -86,7 +84,6 @@ const Restaurantes = () => {
       name: "Saudável",
       count: categoryCounts.saudavel || 0,
       key: "saudavel",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-200 to-checkin-primary-400",
       description: "Opções naturais e nutritivas",
       icon: Salad
@@ -96,7 +93,6 @@ const Restaurantes = () => {
       name: "Hamburguerias",
       count: categoryCounts.hamburguer || 0,
       key: "hamburguer",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Os melhores burgers da cidade",
       icon: Utensils
@@ -106,7 +102,6 @@ const Restaurantes = () => {
       name: "Pizzarias",
       count: categoryCounts.pizza || 0,
       key: "pizza",
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       description: "Pizzas artesanais e tradicionais",
       icon: Utensils
@@ -116,7 +111,6 @@ const Restaurantes = () => {
       name: "Italiana",
       count: categoryCounts.italiana || 0,
       key: "italiana",
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       description: "Autêntica culinária italiana",
       icon: Utensils
@@ -126,7 +120,6 @@ const Restaurantes = () => {
       name: "Japonesa",
       count: categoryCounts.japonesa || 0,
       key: "japonesa",
-      image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-800",
       description: "Sushi, sashimi e pratos nipônicos",
       icon: Utensils
@@ -136,7 +129,6 @@ const Restaurantes = () => {
       name: "Chinesa",
       count: categoryCounts.chinesa || 0,
       key: "chinesa",
-      image: "https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       description: "Tradições culinárias chinesas",
       icon: Utensils
@@ -146,7 +138,6 @@ const Restaurantes = () => {
       name: "Frutos do Mar",
       count: categoryCounts.frutos_mar || 0,
       key: "frutos_mar",
-      image: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-600",
       description: "Especialidades marinhas",
       icon: Utensils
@@ -156,7 +147,6 @@ const Restaurantes = () => {
       name: "Fast Food",
       count: categoryCounts.fast_food || 0,
       key: "fast_food",
-      image: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-700",
       description: "Opções rápidas e saborosas",
       icon: Utensils
@@ -208,13 +198,7 @@ const Restaurantes = () => {
               const IconComponent = cuisine.icon;
               return (
                 <Card key={cuisine.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105">
-                  <div className={`h-20 ${styles.cardFormater} relative`}>
-                    <img 
-                      src={cuisine.image} 
-                      alt={cuisine.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${cuisine.gradient} opacity-90`} />
+                  <div className={`h-20 ${styles.cardFormater} relative bg-gradient-to-t ${cuisine.gradient}`}>
                     <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-2">
                       <IconComponent className="w-5 h-5 mb-1" />
                       <h3 className="text-sm font-semibold text-center">{cuisine.name}</h3>

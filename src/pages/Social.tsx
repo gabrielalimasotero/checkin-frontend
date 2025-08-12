@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { listGroups } from '@/lib/api';
+import { listGroups, listVenues } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,22 +45,54 @@ const Social = () => {
   const [selectedTag, setSelectedTag] = useState("");
   const [peopleFilter, setPeopleFilter] = useState<"todos" | "homens" | "mulheres">("todos");
 
-  // Carregar grupos da API
+  // Estados para contagens de categorias
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
+  // Carregar grupos da API e contagens de categorias
   useEffect(() => {
-    const loadGroups = async () => {
+    const loadData = async () => {
       try {
         setIsLoadingGroups(true);
+        
+        // Carregar grupos
         const groups = await listGroups({ limit: 20 });
         setInterestGroups(groups || []);
+
+        // Carregar venues para contar por categoria
+        const venues = await listVenues({ limit: 1000 });
+        
+        // Contar por categoria
+        const counts: Record<string, number> = {};
+        venues.forEach((venue: any) => {
+          const category = venue.category?.toLowerCase() || 'outros';
+          counts[category] = (counts[category] || 0) + 1;
+        });
+
+        // Mapear contagens para as categorias da UI
+        const mappedCounts = {
+          restaurantes: counts['restaurante'] || counts['restaurant'] || counts['comida'] || 0,
+          bares: counts['bar'] || counts['pub'] || counts['cervejaria'] || 0,
+          eventos: counts['evento'] || counts['event'] || 0,
+          shows: counts['show'] || counts['música'] || counts['musica'] || counts['concerto'] || 0,
+          cafes: counts['café'] || counts['cafe'] || counts['cafeteria'] || 0,
+          promocoes: venues.filter((v: any) => v.has_promotions || v.discount_percentage > 0).length,
+          docerias: counts['doceria'] || counts['doces'] || counts['confeitaria'] || counts['sobremesa'] || 0,
+          padarias: counts['padaria'] || counts['bakery'] || counts['pão'] || counts['pao'] || 0,
+          sorveterias: counts['sorveteria'] || counts['sorvete'] || counts['gelato'] || counts['ice cream'] || 0,
+          acai: counts['açaí'] || counts['acai'] || counts['açai'] || 0,
+        };
+
+        setCategoryCounts(mappedCounts);
       } catch (error) {
-        console.error('Erro ao carregar grupos:', error);
+        console.error('Erro ao carregar dados:', error);
         setInterestGroups([]);
+        setCategoryCounts({});
       } finally {
         setIsLoadingGroups(false);
       }
     };
 
-    loadGroups();
+    loadData();
   }, []);
 
   // Lista de bares disponíveis
@@ -109,7 +141,7 @@ const Social = () => {
       id: 1,
       name: "Restaurantes",
       icon: Utensils,
-      count: 247,
+      count: categoryCounts.restaurantes || 0,
       image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: true,
@@ -119,7 +151,7 @@ const Social = () => {
       id: 2,
       name: "Bares",
       icon: Music,
-      count: 203,
+      count: categoryCounts.bares || 0,
       image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: true
@@ -128,7 +160,7 @@ const Social = () => {
       id: 3,
       name: "Eventos",
       icon: Calendar,
-      count: 89,
+      count: categoryCounts.eventos || 0,
       image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
@@ -137,7 +169,7 @@ const Social = () => {
       id: 4,
       name: "Shows",
       icon: Music,
-      count: 156,
+      count: categoryCounts.shows || 0,
       image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
       clickable: false
@@ -146,54 +178,54 @@ const Social = () => {
       id: 5,
       name: "Cafés",
       icon: Coffee,
-      count: 78,
+      count: categoryCounts.cafes || 0,
       image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-500 to-checkin-primary-700",
       clickable: false
     },
     {
       id: 6,
-      name: "Promoções",
-      icon: Percent,
-      count: 124,
-      image: "https://images.unsplash.com/photo-1607083206869-4c7d0c21e65c?w=200&h=150&fit=crop",
-      gradient: "from-checkin-primary-400 to-checkin-primary-800",
-      clickable: false
-    },
-    {
-      id: 7,
       name: "Docerias",
       icon: Cookie,
-      count: 45,
+      count: categoryCounts.docerias || 0,
       image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-200 to-checkin-primary-400",
       clickable: false
     },
     {
-      id: 8,
+      id: 7,
       name: "Padarias",
       icon: ChefHat,
-      count: 67,
+      count: categoryCounts.padarias || 0,
       image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
-      id: 9,
+      id: 8,
       name: "Sorveterias",
       icon: IceCream,
-      count: 32,
+      count: categoryCounts.sorveterias || 0,
       image: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-300 to-checkin-primary-500",
       clickable: false
     },
     {
-      id: 10,
+      id: 9,
       name: "Açaí",
       icon: IceCream,
-      count: 28,
+      count: categoryCounts.acai || 0,
       image: "https://images.unsplash.com/photo-1605801234031-3d5ad5b51c52?w=200&h=150&fit=crop",
       gradient: "from-checkin-primary-400 to-checkin-primary-600",
+      clickable: false
+    },
+    {
+      id: 10,
+      name: "Promoções",
+      icon: Percent,
+      count: categoryCounts.promocoes || 0,
+      image: "https://images.unsplash.com/photo-1607083206869-4c7d0c21e65c?w=200&h=150&fit=crop",
+      gradient: "from-checkin-primary-400 to-checkin-primary-800",
       clickable: false
     }
   ];

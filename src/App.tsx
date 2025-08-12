@@ -13,7 +13,6 @@ import Post from "./pages/Post";
 import Restaurantes from "./pages/Restaurantes";
 import Profile from "./pages/Profile";
 import VenueDetails from "./pages/VenueDetails";
-import BotecoDaMariaProfile from "./pages/BotecoDaMariaProfile";
 import Status from "./pages/Status";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
@@ -82,11 +81,6 @@ function App() {
                 <Route path="/venue/:id" element={
                   <ProtectedRoute>
                     <VenueDetails />
-                  </ProtectedRoute>
-                } />
-                <Route path="/venue/boteco-da-maria" element={
-                  <ProtectedRoute>
-                    <BotecoDaMariaProfile />
                   </ProtectedRoute>
                 } />
                 <Route path="/status" element={

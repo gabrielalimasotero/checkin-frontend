@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Eye, MessageSquare } from "lucide-react";
+import { CreditCard, Users, Search, MapPin, History, Activity, Clock, Star, Eye, MessageSquare, EyeOff, Globe, Lock } from "lucide-react";
 import MainNavigation from "@/components/MainNavigation";
 import MyCheckInsTab from "@/components/MyCheckInsTab";
 import StatusTab from "@/components/StatusTab";
@@ -33,6 +33,9 @@ const CheckIn = () => {
   const [todayEvents, setTodayEvents] = useState([]);
   const [venues, setVenues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasActiveCheckIn, setHasActiveCheckIn] = useState(false);
+  const [checkInVisibility, setCheckInVisibility] = useState('public'); // 'public' ou 'private'
+  const [activeCheckInVenue, setActiveCheckInVenue] = useState(null);
   
   // Verificar se há parâmetro de aba na URL
   useEffect(() => {
@@ -116,6 +119,48 @@ const CheckIn = () => {
     setOrderItems([]);
   };
 
+  const handleDoCheckIn = async (venueId) => {
+    try {
+      // TODO: Implementar API de check-in
+      // await createCheckIn({ venue_id: venueId, visibility: checkInVisibility });
+      console.log('Check-in realizado:', { venueId, visibility: checkInVisibility });
+      
+      // Simular check-in ativo
+      const venue = venues.find(v => v.id === venueId);
+      setHasActiveCheckIn(true);
+      setActiveCheckInVenue(venue);
+    } catch (error) {
+      console.error('Erro ao fazer check-in:', error);
+    }
+  };
+
+  const toggleCheckInVisibility = async () => {
+    try {
+      const newVisibility = checkInVisibility === 'public' ? 'private' : 'public';
+      
+      // TODO: Implementar API para alterar visibilidade
+      // await updateCheckInVisibility({ visibility: newVisibility });
+      console.log('Visibilidade alterada para:', newVisibility);
+      
+      setCheckInVisibility(newVisibility);
+    } catch (error) {
+      console.error('Erro ao alterar visibilidade:', error);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      // TODO: Implementar API de check-out
+      // await endCheckIn();
+      console.log('Check-out realizado');
+      
+      setHasActiveCheckIn(false);
+      setActiveCheckInVenue(null);
+    } catch (error) {
+      console.error('Erro ao fazer check-out:', error);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -158,8 +203,8 @@ const CheckIn = () => {
             {/* Tabs com melhor proporção */}
             <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50">
               <TabsTrigger value="geral" className="text-sm font-medium">Geral</TabsTrigger>
-              <TabsTrigger value="historico" className="text-sm font-medium">Histórico</TabsTrigger>
               <TabsTrigger value="ativo" className="text-sm font-medium">Ativo</TabsTrigger>
+              <TabsTrigger value="historico" className="text-sm font-medium">Histórico</TabsTrigger>
             </TabsList>
 
             <TabsContent value="geral" className={LAYOUT.section}>
@@ -348,13 +393,120 @@ const CheckIn = () => {
             </TabsContent>
 
             <TabsContent value="ativo" className={LAYOUT.section}>
-              <StatusTab
-                peopleHere={peopleHere}
-                tableCode={tableCode}
-                setTableCode={setTableCode}
-                onCheckIn={handleCheckIn}
-                onRSVP={handleRSVP}
-              />
+              {!hasActiveCheckIn ? (
+                // Estado: Sem check-in ativo - Mostrar opção de fazer check-in
+                <Card className={COMPONENT_VARIANTS.card.standard}>
+                  <div className="text-center py-8">
+                    <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Nenhum check-in ativo</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Escolha um local próximo para fazer check-in
+                    </p>
+                    
+                    {/* Lista de venues próximos para check-in */}
+                    {venues.length > 0 ? (
+                      <div className="space-y-3 max-w-md mx-auto">
+                        {venues.slice(0, 3).map((venue) => (
+                          <Card key={venue.id} className="p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                                  <MapPin className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <div className="text-left">
+                                  <div className="font-medium">{venue.name}</div>
+                                  <div className="text-sm text-muted-foreground">{venue.category}</div>
+                                </div>
+                              </div>
+                              <Button 
+                                size="sm"
+                                onClick={() => handleDoCheckIn(venue.id)}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                Check-in
+                              </Button>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground">
+                        Nenhum local disponível no momento
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ) : (
+                // Estado: Com check-in ativo - Mostrar opções de visibilidade
+                <div className="space-y-4">
+                  <Card className={COMPONENT_VARIANTS.card.standard}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <MapPin className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-semibold">{activeCheckInVenue?.name || 'Local Ativo'}</div>
+                          <div className="text-sm text-muted-foreground">Check-in ativo</div>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-100 text-green-700">
+                        Ativo
+                      </Badge>
+                    </div>
+
+                    {/* Controle de Visibilidade */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          {checkInVisibility === 'public' ? (
+                            <Globe className="w-5 h-5 text-primary" />
+                          ) : (
+                            <Lock className="w-5 h-5 text-muted-foreground" />
+                          )}
+                          <div>
+                            <div className="font-medium">
+                              {checkInVisibility === 'public' ? 'Público' : 'Privado'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {checkInVisibility === 'public' 
+                                ? 'Seus amigos podem ver onde você está'
+                                : 'Apenas você pode ver este check-in'
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={toggleCheckInVisibility}
+                        >
+                          {checkInVisibility === 'public' ? (
+                            <>
+                              <EyeOff className="w-4 h-4 mr-2" />
+                              Tornar Privado
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Tornar Público
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Botão de Check-out */}
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleCheckOut}
+                      >
+                        Fazer Check-out
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="cardapio" className={LAYOUT.section}>

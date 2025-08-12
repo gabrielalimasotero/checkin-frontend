@@ -397,14 +397,25 @@ const Profile = () => {
                 </Button>
               </>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
-              >
-                <Edit3 className="w-4 h-4" />
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/settings')}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                  title="Configurações de Privacidade"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1.5 h-auto"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+              </>
             )}
           </div>
         </div>

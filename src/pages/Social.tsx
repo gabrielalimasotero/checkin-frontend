@@ -477,7 +477,7 @@ const Social = () => {
             
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary">
-                <span className="font-medium">🎯 Grupos Personalizados:</span> Baseados nos seus interesses e localização. Participe ou crie novos grupos!
+                <span className="font-medium">Grupos Personalizados:</span> Baseados nos seus interesses e localização. Participe ou crie novos grupos!
               </p>
             </div>
 
@@ -575,7 +575,7 @@ const Social = () => {
             
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
               <p className="text-xs text-primary">
-                <span className="font-medium">🔍 Baseado em:</span> Seus interesses, localização atual e amigos em comum
+                <span className="font-medium">Baseado em:</span> Seus interesses, localização atual e amigos em comum
               </p>
             </div>
 

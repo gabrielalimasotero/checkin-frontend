@@ -18,6 +18,7 @@ import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
 import Invites from "./pages/Invites";
 import Assistant from "./pages/Assistant";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import MainNavigation from "@/components/MainNavigation";
 
@@ -108,6 +109,11 @@ function App() {
                 <Route path="/assistant" element={
                   <ProtectedRoute>
                     <Assistant />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />

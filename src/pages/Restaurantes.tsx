@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Utensils, MapPin, Star, Award, Heart, Salad } from "lucide-react";
 import MobileNavigation from "@/components/MobileNavigation";
+import styles from "@/styles/restarantes.module.css";
 
 const Restaurantes = () => {
   const navigate = useNavigate();
@@ -141,7 +142,7 @@ const Restaurantes = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 pb-24">
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid ${styles.gridFormater} grid-cols-2 gap-3`}>
           {cuisineTypes
             .filter(cuisine => 
               cuisine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -151,7 +152,7 @@ const Restaurantes = () => {
               const IconComponent = cuisine.icon;
               return (
                 <Card key={cuisine.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105">
-                  <div className="h-20 relative">
+                  <div className={`h-20 ${styles.cardFormater} relative`}>
                     <img 
                       src={cuisine.image} 
                       alt={cuisine.name}

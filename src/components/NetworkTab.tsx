@@ -4,18 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageSquare, MapPin, Star, Verified, MoreHorizontal, Trash2, Calendar, Users } from "lucide-react";
-import { listUserFriends, listUserCheckins, getUser, listIncomingFriendRequests } from "@/lib/api";
+import { Heart, MessageSquare, MapPin, Star, Verified, MoreHorizontal, Trash2, Calendar, Users, Camera, Image } from "lucide-react";
+import { listUserFriends, listUserCheckins, getUser } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NetworkTab = () => {
   const { user: currentUser } = useAuth();
   const [statusText, setStatusText] = useState("");
   const [deletedPosts, setDeletedPosts] = useState<number[]>([]);
-  const [showInvitations, setShowInvitations] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
-  const [receivedInvitations, setReceivedInvitations] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -55,21 +53,6 @@ const NetworkTab = () => {
             };
           });
         setFeedPosts(posts);
-        // Carregar convites (usar solicitações de amizade como placeholder de convites)
-        const requests = await listIncomingFriendRequests().catch(() => []);
-        const mappedInvites = (requests || []).map((r: any) => ({
-          id: r.id,
-          type: 'friendship',
-          title: 'Novo pedido de amizade',
-          organizer: { name: 'Usuário', avatar: '' },
-          venue: '',
-          date: '',
-          attendees: 0,
-          description: 'Você tem um novo pedido de amizade',
-          time: '',
-          status: 'pending',
-        }));
-        setReceivedInvitations(mappedInvites);
       } catch (e) {
         console.error('Erro ao carregar feed:', e);
       } finally {
@@ -92,128 +75,12 @@ const NetworkTab = () => {
     setDeletedPosts(prev => [...prev, postId]);
   };
 
-  const handleAcceptInvitation = (invitationId: number) => {
-    console.log("Convite aceito:", invitationId);
-  };
 
-  const handleDeclineInvitation = (invitationId: number) => {
-    console.log("Convite recusado:", invitationId);
-  };
-
-  const toggleInvitations = () => {
-    setShowInvitations(!showInvitations);
-  };
 
   return (
     <div className="p-4 space-y-4 pb-24">{/* Extra padding for bottom navigation */}
-      {/* Botão "Meus Convites" */}
-      <div className="space-y-4">
-        <Button 
-          className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-semibold"
-          onClick={toggleInvitations}
-        >
-          <Calendar className="w-5 h-5 mr-2" />
-          Meus Convites
-        </Button>
-      </div>
 
-      {/* Convites Expandidos */}
-      {showInvitations && receivedInvitations.length > 0 && (
-        <div className="space-y-3">
-          {receivedInvitations.map((invitation) => (
-            <Card key={invitation.id} className={`p-4 border-2 ${
-              invitation.status === "accepted" 
-                ? "border-green-200 bg-green-50/50" 
-                : "border-primary/20 bg-primary/5"
-            }`}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={invitation.organizer.avatar} alt={invitation.organizer.name} />
-                    <AvatarFallback>{invitation.organizer.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-semibold">{invitation.organizer.name}</span>
-                      <Badge className={`text-xs ${
-                        invitation.status === "accepted" 
-                          ? "bg-green-500 text-white" 
-                          : "bg-primary text-primary-foreground"
-                      }`}>
-                        {invitation.status === "accepted" ? "Aceito" : (
-                          invitation.type === "event" ? "Evento" :
-                          invitation.type === "dinner" ? "Jantar" :
-                          "Atividade"
-                        )}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground">{invitation.time}</div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-2 mb-4">
-                <h4 className={`font-semibold ${invitation.status === "accepted" ? "text-green-700" : "text-primary"}`}>
-                  {invitation.title}
-                </h4>
-                <p className="text-sm text-muted-foreground">{invitation.description}</p>
-                
-                <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="w-3 h-3" />
-                    <span>{invitation.venue}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>{invitation.date}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Users className="w-3 h-3" />
-                    <span>{invitation.attendees} pessoas</span>
-                  </div>
-                </div>
-              </div>
-
-              {invitation.status === "pending" ? (
-                <div className="flex space-x-2">
-                  <Button 
-                    size="sm" 
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                    onClick={() => handleAcceptInvitation(invitation.id)}
-                  >
-                    Aceitar
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleDeclineInvitation(invitation.id)}
-                  >
-                    Recusar
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex space-x-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="flex-1 border-green-500 text-green-700 hover:bg-green-50"
-                  >
-                    Ver Detalhes
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
 
       {/* Status Composer */}
       <Card className="p-4">
@@ -230,8 +97,32 @@ const NetworkTab = () => {
               className="min-h-[80px] resize-none"
             />
             <div className="flex justify-between items-center mt-3">
-              <div className="text-xs text-muted-foreground">
-                {statusText.length}/280
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2 text-muted-foreground hover:text-primary"
+                  onClick={() => {
+                    // TODO: Implementar seleção de fotos
+                    console.log('Adicionar foto');
+                  }}
+                >
+                  <Image className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2 text-muted-foreground hover:text-primary"
+                  onClick={() => {
+                    // TODO: Implementar câmera
+                    console.log('Tirar foto');
+                  }}
+                >
+                  <Camera className="w-4 h-4" />
+                </Button>
+                <div className="text-xs text-muted-foreground">
+                  {statusText.length}/280
+                </div>
               </div>
               <Button 
                 size="sm" 

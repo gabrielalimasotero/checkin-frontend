@@ -16,6 +16,8 @@ import VenueDetails from "./pages/VenueDetails";
 import Status from "./pages/Status";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
+import Invites from "./pages/Invites";
+import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound";
 import MainNavigation from "@/components/MainNavigation";
 
@@ -96,6 +98,16 @@ function App() {
                 <Route path="/messages" element={
                   <ProtectedRoute>
                     <Messages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/invites" element={
+                  <ProtectedRoute>
+                    <Invites />
+                  </ProtectedRoute>
+                } />
+                <Route path="/assistant" element={
+                  <ProtectedRoute>
+                    <Assistant />
                   </ProtectedRoute>
                 } />
                 <Route path="*" element={<NotFound />} />

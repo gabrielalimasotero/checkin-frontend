@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { listGroups } from '@/lib/api';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ const Social = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"lugares" | "grupos" | "pessoas">("lugares");
+  const [interestGroups, setInterestGroups] = useState<any[]>([]);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
+  const [nearbyPeople, setNearbyPeople] = useState<Person[]>([]);
+  const [isLoadingPeople, setIsLoadingPeople] = useState(false);
 
   const [showMeetPeople, setShowMeetPeople] = useState(false);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
@@ -39,6 +44,24 @@ const Social = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState("");
   const [peopleFilter, setPeopleFilter] = useState<"todos" | "homens" | "mulheres">("todos");
+
+  // Carregar grupos da API
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        setIsLoadingGroups(true);
+        const groups = await listGroups({ limit: 20 });
+        setInterestGroups(groups || []);
+      } catch (error) {
+        console.error('Erro ao carregar grupos:', error);
+        setInterestGroups([]);
+      } finally {
+        setIsLoadingGroups(false);
+      }
+    };
+
+    loadGroups();
+  }, []);
 
   // Lista de bares disponíveis
   const availableBars = [
@@ -175,135 +198,9 @@ const Social = () => {
     }
   ];
 
-  // Grupos baseados em interesses e proximidade
-  const interestGroups = [
-    {
-      id: 1,
-      name: "Champions League ZN",
-      interest: "Champions League",
-      avatar: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=50&h=50&fit=crop",
-      members: 36,
-      mutualFriends: 8,
-      radius: "5km",
-      description: "Assistir jogos da Champions em bares da região",
-      nextEvent: "Hoje 21:00 - Bar do João",
-      isJoined: false,
-      tags: ["futebol", "champions league", "bar"]
-    },
-    {
-      id: 2,
-      name: "Amantes do Rock",
-      interest: "Rock",
-      avatar: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=50&h=50&fit=crop",
-      members: 13,
-      mutualFriends: 5,
-      radius: "3km", 
-      description: "Shows de rock e música ao vivo na região",
-      nextEvent: "Sexta 20:00 - Café Blues",
-      isJoined: true,
-      tags: ["rock", "música ao vivo", "show"]
-    },
-    {
-      id: 3,
-      name: "Cafés & Trabalho",
-      interest: "Café",
-      avatar: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=50&h=50&fit=crop",
-      members: 25,
-      mutualFriends: 12,
-      radius: "2km",
-      description: "Cafeterias para trabalhar e networking",
-      nextEvent: "Amanhã 14:00 - Café Cultural",
-      isJoined: false,
-      tags: ["café", "trabalho", "networking"]
-    },
-    {
-      id: 4,
-      name: "Pizza Lovers",
-      interest: "Pizza",
-      avatar: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=50&h=50&fit=crop",
-      members: 156,
-      mutualFriends: 3,
-      radius: "4km",
-      description: "Descobrindo as melhores pizzarias",
-      nextEvent: "Sábado 19:00 - Pizzaria Bella",
-      isJoined: false,
-      tags: ["pizza", "gastronomia", "jantar"]
-    }
-  ];
 
-  // Pessoas próximas com filtros de compatibilidade
-  const nearbyPeople: Person[] = [
-    {
-      id: 1,
-      name: "Ana Silva",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-      distance: "0.2km",
-      venue: "Café Central",
-      interests: ["café", "trabalho"],
-      mutualFriends: 3,
-      connectionType: "1º grau",
-      compatibility: 92,
-      commonInterests: ["Champions League", "Café"],
-      clickable: true,
-      gender: "mulheres"
-    },
-    {
-      id: 2,
-      name: "Carlos Santos",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
-      distance: "0.5km",
-      venue: "Bar do Rock",
-      interests: ["música", "cerveja"],
-      mutualFriends: 1,
-      connectionType: "2º grau",
-      compatibility: 85,
-      commonInterests: ["Rock", "Craft Beer"],
-      clickable: false,
-      gender: "homens"
-    },
-    {
-      id: 3,
-      name: "Mariana Costa",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-      distance: "0.8km",
-      venue: "Pizzaria Bella",
-      interests: ["pizza", "amigos"],
-      mutualFriends: 5,
-      connectionType: "1º grau",
-      compatibility: 88,
-      commonInterests: ["Pizza", "Futebol"],
-      clickable: false,
-      gender: "mulheres"
-    },
-    {
-      id: 4,
-      name: "Pedro Oliveira",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-      distance: "1.2km",
-      venue: "Café Cultural",
-      interests: ["café", "arte"],
-      mutualFriends: 2,
-      connectionType: "2º grau",
-      compatibility: 78,
-      commonInterests: ["Arte", "Café"],
-      clickable: false,
-      gender: "homens"
-    },
-    {
-      id: 5,
-      name: "Juliana Santos",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=50&h=50&fit=crop&crop=face",
-      distance: "0.6km",
-      venue: "Bar do João",
-      interests: ["música", "dança"],
-      mutualFriends: 4,
-      connectionType: "1º grau",
-      compatibility: 91,
-      commonInterests: ["Música", "Dança"],
-      clickable: true,
-      gender: "mulheres"
-    }
-  ];
+
+
 
   const getConnectionBadgeColor = (type: string) => {
     switch (type) {

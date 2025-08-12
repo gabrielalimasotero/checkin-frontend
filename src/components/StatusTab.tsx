@@ -35,7 +35,7 @@ const StatusTab = ({
 }: StatusTabProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [venueName, setVenueName] = useState<string>("Local");
+  const [venueName, setVenueName] = useState<string | null>(null);
   const [accountBacklog, setAccountBacklog] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,8 +46,8 @@ const StatusTab = ({
       try {
         setIsLoading(true);
         const checkins = await listVenueCheckins(vid, { limit: 10 });
-        // Placeholder: derivar nome do local e backlog conforme o modelo evoluir
-        setVenueName('Local');
+        // TODO: Derivar nome do local real da API quando estiver disponível
+        setVenueName('Nome do Local'); // Placeholder até implementar
         setAccountBacklog((checkins || []).map((c: any, idx: number) => ({
           id: idx + 1,
           item: c.review ? c.review.substring(0, 20) : 'Consumo',
@@ -130,10 +130,12 @@ const StatusTab = ({
 
   return (
     <div className={LAYOUT.section}>
-      {/* Você está em */}
+      {/* Status do Check-in */}
       <Card className={`${COMPONENT_VARIANTS.card.spacious} bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20`}>
         <div>
-          <h3 className="text-base font-semibold text-primary">Você está em {venueName}.</h3>
+          <h3 className="text-base font-semibold text-primary">
+            {venueName ? `Você está em ${venueName}.` : "Você ainda não fez check-in."}
+          </h3>
         </div>
       </Card>
 
@@ -204,15 +206,19 @@ const StatusTab = ({
             <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-3">
               <Receipt className="w-8 h-8 text-muted-foreground" />
             </div>
-            <p className="text-caption text-muted-foreground mb-4">Nenhum item na conta</p>
-            <Button 
-              variant="outline" 
-              onClick={handleAddItems}
-              className={COMPONENT_VARIANTS.button.outline}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar itens
-            </Button>
+            <p className="text-caption text-muted-foreground mb-4">
+              {venueName ? "Nenhum item na conta" : "Faça check-in em um local para começar"}
+            </p>
+            {venueName && (
+              <Button 
+                variant="outline" 
+                onClick={handleAddItems}
+                className={COMPONENT_VARIANTS.button.outline}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar itens
+              </Button>
+            )}
           </div>
         )}
       </Card>

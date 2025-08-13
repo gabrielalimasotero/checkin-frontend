@@ -31,16 +31,10 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const nextIndex = currentFallbackIndex + 1;
     
-    if (currentFallbackIndex === -1) {
-      console.warn(`🖼️ Original image failed to load: "${src}"`);
-    }
-    
     if (nextIndex < fallbacks.length) {
-      console.warn(`🔄 Trying fallback ${nextIndex}: ${fallbacks[nextIndex]}`);
       setCurrentFallbackIndex(nextIndex);
       e.currentTarget.src = fallbacks[nextIndex];
     } else if (currentFallbackIndex !== -2) {
-      console.warn(`❌ All fallbacks failed, using final fallback: ${fallbackSrc}`);
       setCurrentFallbackIndex(-2);
       e.currentTarget.src = fallbackSrc;
     }

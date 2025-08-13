@@ -36,7 +36,7 @@ const CreateGroupDialog = ({ isOpen, onClose }: CreateGroupDialogProps) => {
       
       try {
         setIsLoadingFriends(true);
-        // TODO: Implementar chamada da API para listar amigos
+        // Implementar chamada da API para listar amigos
         // const friends = await listFriends();
         // setAvailableFriends(friends.map(f => ({ ...f, isSelected: false })));
         setAvailableFriends([]); // Por enquanto, lista vazia até implementar API

@@ -99,11 +99,11 @@ const CheckIn = () => {
       setShowLocationDialog(true);
       return;
     }
-    console.log("Check-in realizado");
+
   };
 
   const handleRSVP = () => {
-    console.log("RSVP realizado");
+
   };
 
   const handleCompletePayment = () => {
@@ -111,7 +111,7 @@ const CheckIn = () => {
   };
 
   const handleChangeRSVP = (eventId: number) => {
-    console.log(`Mudando RSVP para evento ${eventId}`);
+
   };
 
   const handlePaymentComplete = () => {
@@ -121,9 +121,9 @@ const CheckIn = () => {
 
   const handleDoCheckIn = async (venueId) => {
     try {
-      // TODO: Implementar API de check-in
+
       // await createCheckIn({ venue_id: venueId, visibility: checkInVisibility });
-      console.log('Check-in realizado:', { venueId, visibility: checkInVisibility });
+
       
       // Simular check-in ativo
       const venue = venues.find(v => v.id === venueId);
@@ -138,9 +138,9 @@ const CheckIn = () => {
     try {
       const newVisibility = checkInVisibility === 'public' ? 'private' : 'public';
       
-      // TODO: Implementar API para alterar visibilidade
+
       // await updateCheckInVisibility({ visibility: newVisibility });
-      console.log('Visibilidade alterada para:', newVisibility);
+
       
       setCheckInVisibility(newVisibility);
     } catch (error) {
@@ -150,9 +150,9 @@ const CheckIn = () => {
 
   const handleCheckOut = async () => {
     try {
-      // TODO: Implementar API de check-out
+
       // await endCheckIn();
-      console.log('Check-out realizado');
+
       
       setHasActiveCheckIn(false);
       setActiveCheckInVenue(null);

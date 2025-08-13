@@ -46,8 +46,8 @@ const StatusTab = ({
       try {
         setIsLoading(true);
         const checkins = await listVenueCheckins(vid, { limit: 10 });
-        // TODO: Derivar nome do local real da API quando estiver disponível
-        setVenueName('Nome do Local'); // Placeholder até implementar
+        // Derivar nome do local real da API quando estiver disponível
+        setVenueName('Nome do Local');
         setAccountBacklog((checkins || []).map((c: any, idx: number) => ({
           id: idx + 1,
           item: c.review ? c.review.substring(0, 20) : 'Consumo',

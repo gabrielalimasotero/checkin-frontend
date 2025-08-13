@@ -53,9 +53,8 @@ const Invites = () => {
 
   const handleAcceptInvite = async (inviteId: string) => {
     try {
-      // TODO: Implementar API para aceitar convite
+      // Implementar API para aceitar convite
       // await acceptInvite(inviteId);
-      console.log('Convite aceito:', inviteId);
       // Recarregar lista de convites
     } catch (error) {
       console.error('Erro ao aceitar convite:', error);
@@ -64,9 +63,8 @@ const Invites = () => {
 
   const handleDeclineInvite = async (inviteId: string) => {
     try {
-      // TODO: Implementar API para recusar convite
+      // Implementar API para recusar convite
       // await declineInvite(inviteId);
-      console.log('Convite recusado:', inviteId);
       // Recarregar lista de convites
     } catch (error) {
       console.error('Erro ao recusar convite:', error);
@@ -74,8 +72,7 @@ const Invites = () => {
   };
 
   const handleCreateInvite = () => {
-    // TODO: Navegar para página de criação de convite ou abrir modal
-    console.log('Criar novo convite');
+    // Navegar para página de criação de convite ou abrir modal
   };
 
   const getCurrentInvites = () => {

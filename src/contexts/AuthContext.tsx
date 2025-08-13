@@ -165,12 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.warn('Falha ao realizar login no backend:', e?.message || e);
         }
         await fetchUserProfile(data.user.id);
-        // Obter e armazenar token do backend
-        try {
-          await backendLogin(email);
-        } catch (e: any) {
-          console.warn('Falha ao realizar login no backend:', e?.message || e);
-        }
         return { success: true };
       }
 

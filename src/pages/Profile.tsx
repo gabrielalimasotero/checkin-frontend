@@ -35,8 +35,7 @@ import CreateGroupDialog from "@/components/CreateGroupDialog";
 const Profile = () => {
   const { user, logout, refreshUser } = useAuth();
   
-  // Debug: log dos dados do usuário
-  console.log('🔍 Profile - Dados do usuário:', user);
+
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -119,12 +118,10 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      console.log('💾 Salvando alterações do perfil...');
-      console.log('📋 Nome a ser salvo:', editedName);
-      console.log('📋 ID do usuário:', user?.id);
+
       
       if (!user?.id) {
-        console.error('❌ ID do usuário não encontrado');
+        console.error('Erro: ID do usuário não encontrado');
         setIsSaving(false);
         return;
       }
@@ -132,13 +129,13 @@ const Profile = () => {
       // Salvar no backend
       const { updateUser } = await import('@/lib/api');
       await updateUser(user.id, { name: editedName });
-      console.log('✅ Perfil salvo com sucesso no backend');
+
       setIsEditing(false);
       await refreshUser();
     } catch (err) {
-      console.error('❌ Erro ao salvar perfil:', err);
+      console.error('Erro ao salvar perfil:', err);
     } finally {
-      console.log('🔄 Finalizando save, isLoading = false');
+
       setIsSaving(false);
     }
   };
@@ -146,19 +143,19 @@ const Profile = () => {
   // Carregar interesses do usuário
   const loadUserInterests = async () => {
     if (!user?.id) {
-      console.log('❌ Usuário não autenticado, não é possível carregar interesses');
+
       return;
     }
     
     try {
       setIsLoadingInterests(true);
-      console.log('🔄 Carregando interesses do usuário (backend):', user.id);
+
       const data = await getUserInterests(user.id);
       const interestNames = (data || []).map(i => i.name).filter(Boolean) as string[];
       setInterests(interestNames);
-      console.log('✅ Interesses carregados com sucesso do backend:', interestNames);
+
     } catch (error) {
-      console.error('❌ Erro ao carregar interesses:', error);
+      console.error('Erro ao carregar interesses:', error);
     } finally {
       setIsLoadingInterests(false);
     }

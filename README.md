@@ -40,6 +40,37 @@ CheckIn is a mobile-first social networking app built with React and TypeScript.
 - **Build Tool**: Vite
 - **UI Components**: Radix UI primitives with custom styling
 
+## API Data Contract (Frontend)
+
+The frontend expects the following `Venue` shape from the backend:
+
+```ts
+// src/lib/api.ts
+export interface Venue {
+  id: string;
+  name: string;
+  description?: string | null;
+  category: string;
+  address?: string | null;
+  latitude?: string | null;   // updated: now string
+  longitude?: string | null;  // updated: now string
+  phone?: string | null;
+  website?: string | null;
+  hours?: string | null;
+  price_range?: string | null; // updated: now string
+  rating: number;
+  total_reviews: number;
+  image_url?: string | null;
+  tags?: string[] | null;
+  is_active: boolean;
+  features?: string | null;   // new: semicolon/comma separated features
+}
+```
+
+Notes:
+- `features` is a plain string (e.g.: "Aceita cartão; Mesas ao ar livre; Wi-fi gratuito"). The UI splits by comma or semicolon and renders chips.
+- If you compute distances or map markers, parse `latitude`/`longitude` with `parseFloat` before calculations.
+
 ## Project Structure
 
 ```
@@ -80,6 +111,10 @@ npm install
 npm run dev
 ```
 
+### Environment
+
+Set `VITE_API_BASE_URL` to point the frontend to your backend, and the Supabase variables as per `SUPABASE_SETUP.md`.
+
 ### Configuração do Supabase
 
 O projeto já está configurado com as credenciais do Supabase. Para começar:
@@ -105,6 +140,16 @@ The app uses a consistent design system with:
 - **Typography**: Helvetica as default, Ubuntu for headings
 - **Components**: Standardized UI components with consistent spacing
 - **Layout**: Mobile-first responsive design
+
+## Changelog (Frontend)
+
+- Updated `Venue.latitude`/`longitude` to `string | null` (were numbers)
+- Updated `Venue.price_range` to `string | null` (was a union)
+- Added `Venue.features: string | null` and UI chips in Venue Details
+- Reduced tagline font-size in Welcome screen ("Where are we going?")
+- Removed outdated React Native navigation files from project root
+- Removed duplicate Supabase client under `src/integrations/supabase/`
+- Cleaned excessive console logs and TODO markers
 
 ## Contributing
 

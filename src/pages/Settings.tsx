@@ -58,9 +58,8 @@ const Settings = () => {
 
     try {
       setIsSaving(true);
-      // TODO: Implementar API para salvar configurações
+      // Implementar API para salvar configurações
       // await updateUserPrivacySettings({ [key]: value });
-      console.log('Configuração atualizada:', { [key]: value });
     } catch (error) {
       console.error('Erro ao salvar configuração:', error);
       // Reverter mudança em caso de erro

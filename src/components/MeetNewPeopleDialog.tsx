@@ -26,7 +26,7 @@ const MeetNewPeopleDialog = ({ isOpen, onClose }: MeetNewPeopleDialogProps) => {
       
       try {
         setIsLoading(true);
-        // TODO: Implementar chamadas da API para grupos e pessoas próximas
+        // Implementar chamadas da API para grupos e pessoas próximas
         // const gruposData = await listNearbyGroups();
         // const peopleData = await listNearbyPeople();
         // setGrupos(gruposData || []);

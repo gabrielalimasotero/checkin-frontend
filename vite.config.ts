@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8081,
+    proxy: {
+      "/ai": {
+        target: "https://ia.henriquefontaine.com",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/ai/, ""),
+      },
+    },
   },
   plugins: [
     react(),

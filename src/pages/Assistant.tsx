@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Bot, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -14,13 +15,41 @@ interface Message {
   timestamp: Date;
 }
 
+interface RecommendationItem {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  rating: number;
+  total_reviews: number;
+  price_range: string;
+  features: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface AssistantApiResponse {
+  user_message: string;
+  intent: {
+    query: string;
+    features: string[];
+    min_rating: number;
+    max_distance_km: number | null;
+    lat: number | null;
+    lon: number | null;
+  };
+  recommendations: RecommendationItem[];
+}
+
 const Assistant = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, supabaseUser } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,24 +84,45 @@ const Assistant = () => {
     setInputText("");
     setIsTyping(true);
 
-    // Implementar integração com API do assistente inteligente
-    // const response = await sendMessageToAssistant(inputText);
-    
-    // Simular resposta do assistente (remover quando API estiver pronta)
-    setTimeout(() => {
+    try {
+      // Usa proxy local para evitar CORS em desenvolvimento
+      const res = await apiFetch<AssistantApiResponse>('/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage.text })
+      });
+
+      const top = res.recommendations.slice(0, 5);
+      const header = res.intent?.query
+        ? `Encontrei opções para "${res.intent.query}"${res.intent.features?.length ? ` com ${res.intent.features.join(', ')}` : ''}:\n`
+        : 'Aqui estão algumas recomendações:\n';
+      const list = top.map((r, idx) => `${idx + 1}. ${r.name} — ${r.category} (${r.price_range || '-'})\n   ⭐ ${r.rating.toFixed(1)} (${r.total_reviews})\n   ${r.address}`).join('\n\n');
+      const assistantText = `${header}${list}`;
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Obrigado pela sua mensagem! Estou processando sua solicitação. Em breve terei uma resposta personalizada para você.',
+        text: assistantText,
         sender: 'assistant',
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (err: any) {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: `Não consegui buscar recomendações agora. ${err?.message ? `Detalhes: ${err.message}` : ''}`.trim(),
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    } finally {
       setIsTyping(false);
-    }, 2000);
+      // Foca novamente no input para facilitar a digitação contínua
+      inputRef.current?.focus();
+    }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -116,7 +166,7 @@ const Assistant = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-28">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -127,7 +177,7 @@ const Assistant = () => {
             }`}>
               <Avatar className="w-8 h-8 flex-shrink-0">
                 {message.sender === 'user' ? (
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarImage src={user?.avatar_url || supabaseUser?.user_metadata?.avatar_url || undefined} />
                 ) : (
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     <Bot className="w-4 h-4" />
@@ -183,16 +233,21 @@ const Assistant = () => {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-border p-4">
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-border p-3 z-[60] safe-area-bottom shadow-lg">
         <div className="max-w-sm mx-auto">
           <div className="flex items-center space-x-2">
             <Input
+              ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Digite sua mensagem..."
+              type="text"
+              autoFocus
+              inputMode="text"
+              enterKeyHint="send"
+              autoComplete="off"
               className="flex-1"
-              disabled={isTyping}
             />
             <Button
               onClick={handleSendMessage}

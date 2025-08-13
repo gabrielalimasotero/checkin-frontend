@@ -4,8 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://nwikoaogixmhiiqcdxqs.supabase.co";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53aWtvYW9naXhtaGlpcWNkeHFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5MDUwNDEsImV4cCI6MjA2OTQ4MTA0MX0.d279Vz-X33ps9P1Sx7iTgsH87oz55HMzm8U0_uukoOQ";
 
-// Configuração de redirecionamento
-const REDIRECT_URL = import.meta.env.VITE_REDIRECT_URL || "http://localhost:8081";
 
 // Tipos para o banco de dados
 export interface Database {
@@ -74,12 +72,12 @@ export interface Database {
           description: string | null;
           category: string;
           address: string | null;
-          latitude: number | null;
-          longitude: number | null;
+          latitude: string | null;
+          longitude: string | null;
           phone: string | null;
           website: string | null;
           hours: string | null;
-          price_range: '$' | '$$' | '$$$' | '$$$$' | null;
+          price_range: string | null;
           rating: number;
           total_reviews: number;
           image_url: string | null;

@@ -179,17 +179,18 @@ export interface Venue {
   description?: string | null;
   category: string;
   address?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  latitude?: string | null;
+  longitude?: string | null;
   phone?: string | null;
   website?: string | null;
   hours?: string | null;
-  price_range?: '$' | '$$' | '$$$' | '$$$$' | null;
+  price_range?: string | null;
   rating: number;
   total_reviews: number;
   image_url?: string | null;
   tags?: string[] | null;
   is_active: boolean;
+  features?: string | null;
 }
 
 export async function listVenues(params?: { search?: string; skip?: number; limit?: number; sort_by?: string; sort_order?: 'asc' | 'desc' }): Promise<Venue[]> {

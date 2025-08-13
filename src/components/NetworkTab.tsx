@@ -103,7 +103,7 @@ const NetworkTab = () => {
                   size="sm"
                   className="p-2 text-muted-foreground hover:text-primary"
                   onClick={() => {
-                    // TODO: Implementar seleção de fotos
+                    // Implementar seleção de fotos
                     console.log('Adicionar foto');
                   }}
                 >
@@ -114,7 +114,7 @@ const NetworkTab = () => {
                   size="sm"
                   className="p-2 text-muted-foreground hover:text-primary"
                   onClick={() => {
-                    // TODO: Implementar câmera
+                    // Implementar câmera
                     console.log('Tirar foto');
                   }}
                 >

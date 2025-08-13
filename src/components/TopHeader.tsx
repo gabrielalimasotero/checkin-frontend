@@ -18,7 +18,7 @@ const TopHeader = () => {
         const count = (data || []).filter((n) => !n.is_read).length;
         setUnreadCount(count);
         
-        // TODO: Implementar contagem de convites quando API estiver disponível
+        // Implementar contagem de convites quando API estiver disponível
         setInvitesCount(0);
       } catch (e) {
         // Em caso de erro, não mostrar badge

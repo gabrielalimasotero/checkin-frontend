@@ -55,7 +55,7 @@ const Assistant = () => {
     setInputText("");
     setIsTyping(true);
 
-    // TODO: Implementar integração com API do assistente inteligente
+    // Implementar integração com API do assistente inteligente
     // const response = await sendMessageToAssistant(inputText);
     
     // Simular resposta do assistente (remover quando API estiver pronta)

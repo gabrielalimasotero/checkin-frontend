@@ -21,8 +21,8 @@ const Restaurantes = () => {
     const loadCategoryCounts = async () => {
       try {
         setIsLoading(true);
-        // Carregar todos os venues para contar por categoria
-        const venues = await listVenues({ limit: 1000 }); // Pegar todos
+        // Carregar venues para contar por categoria
+        const venues = await listVenues({ limit: 1000 });
         
         // Contar por categoria
         const counts: Record<string, number> = {};

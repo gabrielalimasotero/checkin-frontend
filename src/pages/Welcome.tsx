@@ -81,7 +81,7 @@ const Welcome = () => {
               />
             </div>
             <h1 className="text-6xl font-bold gradient-text mb-4 font-ubuntu">CheckIn</h1>
-            <p className="text-2xl text-gray-600 font-medium">Where are we going?</p>
+            <p className="text-xl text-gray-600 font-medium">Where are we going?</p>
           </div>
         </div>
       </div>

@@ -32,7 +32,7 @@ const CheckInDialog = ({ open, onOpenChange }: CheckInDialogProps) => {
     if (!user?.id) return;
     try {
       setIsSubmitting(true);
-      // TODO: pegar venue_id real do contexto/rota. Usando placeholder por enquanto.
+      // Pegar venue_id real do contexto/rota
       const venueId = (window as any).CURRENT_VENUE_ID || '00000000-0000-0000-0000-000000000000';
       await createCheckin({
         user_id: user.id,

@@ -44,8 +44,12 @@ const VenueDetails = () => {
           rating: v.rating ?? 0,
           reviewCount: v.total_reviews ?? 0,
           address: v.address || '',
+          latitude: v.latitude || null,
+          longitude: v.longitude || null,
           phone: v.phone || '',
           hours: v.hours || '',
+          priceRange: v.price_range || '',
+          features: v.features || '',
           images: v.image_url ? [v.image_url] : [],
           stats: { peopleHere: 0, intendToGo: 0, friends: 0, openToMeet: 0 },
           menu: [],
@@ -104,7 +108,7 @@ const VenueDetails = () => {
         <Button
           variant="ghost"
           size="sm"
-          className={`absolute top-4 right-4 ${isFollowing ? 'bg-checkin-turquoise-500 text-white' : 'bg-white/90'} hover:bg-white`}
+          className={`absolute top-4 right-4 ${isFollowing ? 'bg-primary text-white' : 'bg-white/90'} hover:bg-white`}
           onClick={handleFollow}
         >
           <Heart className={`w-4 h-4 ${isFollowing ? 'fill-current' : ''}`} />
@@ -126,7 +130,7 @@ const VenueDetails = () => {
             </div>
           </div>
           <Button 
-            className={`${isFollowing ? 'bg-gray-500' : 'bg-checkin-turquoise-500'} hover:bg-checkin-turquoise-600`}
+            className={`${isFollowing ? 'bg-gray-500' : 'bg-primary'} hover:bg-primary/90`}
             onClick={handleFollow}
           >
             {isFollowing ? 'Seguindo' : 'Seguir'}
@@ -136,7 +140,7 @@ const VenueDetails = () => {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3 mt-4 p-3 bg-gray-50 rounded-lg">
           <div className="text-center">
-             <div className="font-semibold text-checkin-turquoise-600">{venue?.stats?.peopleHere ?? 0}</div>
+             <div className="font-semibold text-primary">{venue?.stats?.peopleHere ?? 0}</div>
             <div className="text-xs text-gray-600">Aqui agora</div>
           </div>
           <div className="text-center">
@@ -207,7 +211,7 @@ const VenueDetails = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-sm">{item.name}</h4>
-                        <p className="text-checkin-turquoise-600 font-semibold">
+                        <p className="text-primary font-semibold">
                           R$ {item.price.toFixed(2)}
                         </p>
                       </div>
@@ -285,6 +289,27 @@ const VenueDetails = () => {
                      <p className="text-gray-600 text-sm">{venue?.phone}</p>
                   </div>
                 </div>
+                {venue?.priceRange && (
+                  <div className="flex items-start space-x-3">
+                    <Badge className="bg-gray-100 text-gray-700" variant="secondary">
+                      Faixa de preço: {venue.priceRange}
+                    </Badge>
+                  </div>
+                )}
+                {venue?.features && (
+                  <div className="flex items-start space-x-3">
+                    <div>
+                      <p className="font-medium text-sm">Diferenciais</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {venue.features.split(/[,;]+/).map((f: string, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {f.trim()}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
           </TabsContent>

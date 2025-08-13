@@ -85,12 +85,15 @@ const Assistant = () => {
     setIsTyping(true);
 
     try {
-      // Usa proxy local para evitar CORS em desenvolvimento
-      const res = await apiFetch<AssistantApiResponse>('/ai/chat', {
+      // Em dev, usa proxy do Vite (/ai -> https://ia.henriquefontaine.com)
+      const endpoint = import.meta.env.DEV ? '/ai/chat' : 'https://ia.henriquefontaine.com/chat';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage.text })
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const res: AssistantApiResponse = await response.json();
 
       const top = res.recommendations.slice(0, 5);
       const header = res.intent?.query
